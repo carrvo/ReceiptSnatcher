@@ -1,7 +1,7 @@
 import unittest
 
-import receptsnatcher
-#from receptsnatcher import
+import receiptsnatcher
+from receiptsnatcher import DatabaseLayer
 
 class DatabaseTests(unittest.TestCase):
     pass
