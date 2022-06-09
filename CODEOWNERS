@@ -1,0 +1,9 @@
+# Please add user-defined ownership here
+/py/test/__main__.py @carrvo
+
+# Administrative ownership
+/LICENSE @carrvo
+/CLA.md @carrvo
+/CLA.md @carrvo
+/CONTRIBUTING.md @carrvo
+/CODEOWNERS @carrvo
