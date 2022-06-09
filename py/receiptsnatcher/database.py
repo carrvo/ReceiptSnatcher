@@ -42,6 +42,7 @@ class DatabaseLayer(object):
         cursor = self.connection.cursor()
         cursor.execute('''CREATE TABLE IF NOT EXISTS Receipt (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
+            business_name TEXT NOT NULL,
             image BLOB NOT NULL,
             total REAL NOT NULL CHECK(total>0)
         )
@@ -60,14 +61,14 @@ class DatabaseLayer(object):
     def __exit__(self, *exc_details):
         self.connection.close()
 
-    def insert(self, image, total, row_dicts):
+    def insert(self, business_name, image, total, row_dicts):
         """
         """
         if total != round_monetary(sum(row.get('price') for row in row_dicts)):
             raise ValueError
         cursor = self.connection.cursor()
-        cursor.execute('INSERT INTO Receipt(image, total) values(?, ?)',
-                        (image, round_monetary(total)))
+        cursor.execute('INSERT INTO Receipt(business_name, image, total) values(?, ?, ?)',
+                        (business_name, image, round_monetary(total)))
         receiptId = cursor.lastrowid
         cursor.executemany('INSERT INTO Item(name, price, receipt) values(?, ?, ?)',
                            (
