@@ -107,10 +107,10 @@ class DatabaseLayer(object):
         cursor = self.connection.cursor()
         cursor.execute('INSERT INTO Receipt(business_name, image, total) values(?, ?, ?)',
                         (business_name, image, round_monetary(total)))
-        receiptId = cursor.lastrowid
+        receipt_id = cursor.lastrowid
         cursor.executemany('INSERT INTO Item(name, price, quantity, receipt) values(?, ?, ?, ?)',
                            (
-                                (row.get('name'), round_monetary(row.get('price')), row.get('quantity'), receiptId)
+                                (row.get('name'), round_monetary(row.get('price')), row.get('quantity'), receipt_id)
                                 for row
                                 in row_dicts
                            ))
