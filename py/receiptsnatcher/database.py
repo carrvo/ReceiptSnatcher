@@ -1,4 +1,6 @@
 """
+Provides a SQLite3 database backend.
+
 https://docs.python.org/3/library/sqlite3.html
 https://www.sqlite.org/index.html
 https://stackoverflow.com/a/6318154/7163041
