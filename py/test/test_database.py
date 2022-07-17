@@ -4,8 +4,14 @@ import receiptsnatcher
 from receiptsnatcher import DatabaseLayer
 
 class DatabaseTests(unittest.TestCase):
+    """
+    Tests for the DatabaseLayer.
+    """
 
     def test_insert(self):
+        """
+        Tests the insert against its retrieval.
+        """
         with DatabaseLayer(':memory:') as db:
             db.insert('business', b'test', 12.34, (
                 {'name':'test float', 'price':1.34},
