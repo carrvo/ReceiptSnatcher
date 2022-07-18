@@ -83,6 +83,13 @@ class DatabaseLayer(object):
             FOREIGN KEY(receipt) REFERENCES Receipt(id)
         )
         ''')
+        cursor.execute('''CREATE TABLE IF NOT EXISTS Tag(
+            path TEXT NOT NULL,
+            item INTEGER NOT NULL,
+            FOREIGN KEY(item) REFERENCES Item(id),
+            PRIMARY KEY(path, item)
+        )
+        ''')
         cursor.close()
         return self
 
@@ -118,6 +125,20 @@ class DatabaseLayer(object):
                            ))
         cursor.close()
 
+    def add_tag(self, item, path):
+        """
+        Inserts a new tag into the database.
+
+        :item: The item object to tag.
+        :path: A path that uniquely identifies the tag
+            (use ` / ` to denote sub-tags).
+        """
+        assert isinstance(item, sqlite3.Row)
+        cursor = self.connection.cursor()
+        cursor.execute('INSERT INTO Tag(item, path) values(?, ?)',
+                       (item['id'], path))
+        cursor.close()
+
     @property
     def receipts(self):
         """
@@ -134,4 +155,13 @@ class DatabaseLayer(object):
         """
         cursor = self.connection.cursor()
         cursor.execute('SELECT * FROM Item')
+        return FetchGenerator(cursor)
+
+    @property
+    def tags(self):
+        """
+        Retrieves the tags from the database.
+        """
+        cursor = self.connection.cursor()
+        cursor.execute('SELECT * FROM Tag')
         return FetchGenerator(cursor)
