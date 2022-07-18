@@ -21,11 +21,12 @@ class FetchGenerator(object):
     A generator for fetching rows from a database query.
     """
 
-    def __init__(self, cursor):
+    def __init__(self, cursor, *primary_keys):
         """
         Initialize self. See help(type(self)) for accurate signature.
         """
         self.cursor = cursor
+        self.primary_keys = lambda row: {key:row[key] for key in primary_keys}
 
     def __iter__(self):
         """
@@ -47,26 +48,15 @@ class FetchGenerator(object):
         """
         Return self==value.
         """
-        try:
-            return tuple(
-                row['id']
-                for row
-                in tuple(self)
-            ) == tuple(
-                row['id']
-                for row
-                in tuple(value)
-            )
-        except KeyError:
-            return tuple(
-                {'path':row['path'], 'item':row['item']}
-                for row
-                in tuple(self)
-            ) == tuple(
-                {'path':row['path'], 'item':row['item']}
-                for row
-                in tuple(value)
-            )
+        return tuple(
+            self.primary_keys(row)
+            for row
+            in tuple(self)
+        ) == tuple(
+            self.primary_keys(row)
+            for row
+            in tuple(value)
+        )
 
     def __del__(self):
         """
@@ -185,7 +175,7 @@ class DatabaseLayer(object):
         """
         cursor = self.connection.cursor()
         cursor.execute('SELECT * FROM Receipt')
-        return FetchGenerator(cursor)
+        return FetchGenerator(cursor, 'id')
 
     @property
     def items(self):
@@ -194,7 +184,7 @@ class DatabaseLayer(object):
         """
         cursor = self.connection.cursor()
         cursor.execute('SELECT * FROM Item')
-        return FetchGenerator(cursor)
+        return FetchGenerator(cursor, 'id')
 
     @property
     def tags(self):
@@ -203,7 +193,7 @@ class DatabaseLayer(object):
         """
         cursor = self.connection.cursor()
         cursor.execute('SELECT * FROM Tag')
-        return FetchGenerator(cursor)
+        return FetchGenerator(cursor, 'path', 'item')
 
 class BusinessFilter(object):
     """
@@ -223,7 +213,7 @@ class BusinessFilter(object):
         cursor = self.database.connection.cursor()
         cursor.execute('SELECT * FROM Receipt WHERE business_name == ?',
                        (name,))
-        return FetchGenerator(cursor)
+        return FetchGenerator(cursor, 'id')
 
 class ItemFilter(object):
     """
@@ -243,7 +233,7 @@ class ItemFilter(object):
         cursor = self.database.connection.cursor()
         cursor.execute('SELECT * FROM Item WHERE name == ?',
                        (name,))
-        return FetchGenerator(cursor)
+        return FetchGenerator(cursor, 'id')
 
 class PriceFilter(object):
     """
@@ -267,7 +257,7 @@ class PriceFilter(object):
         cursor = self.database.connection.cursor()
         cursor.execute('SELECT * FROM Item WHERE price {} ?'.format(self.limit),
                        (price,))
-        return FetchGenerator(cursor)
+        return FetchGenerator(cursor, 'id')
 
 class ReceiptFilter(object):
     """
@@ -288,7 +278,7 @@ class ReceiptFilter(object):
         cursor = self.database.connection.cursor()
         cursor.execute('SELECT * FROM Item WHERE receipt == ?',
                        (receipt['id'],))
-        return FetchGenerator(cursor)
+        return FetchGenerator(cursor, 'id')
 
 class TagFilter(object):
     """
@@ -308,7 +298,7 @@ class TagFilter(object):
         cursor = self.database.connection.cursor()
         cursor.execute('SELECT * FROM Item WHERE id in (SELECT item FROM Tag WHERE path LIKE ?)',
                        ('{}%'.format(path),))
-        return FetchGenerator(cursor)
+        return FetchGenerator(cursor, 'id')
 
 class ItemTags(object):
     """
@@ -329,4 +319,4 @@ class ItemTags(object):
         cursor = self.database.connection.cursor()
         cursor.execute('SELECT path FROM Tag WHERE item in (SELECT id FROM Item WHERE id == ?)',
                        (item['id'],))
-        return (t['path'] for t in FetchGenerator(cursor))
+        return (t['path'] for t in FetchGenerator(cursor, 'path'))
