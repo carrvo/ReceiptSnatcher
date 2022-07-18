@@ -33,7 +33,7 @@ class DatabaseTests(unittest.TestCase):
 
     def test_tagging(self):
         """
-        Tests adding a tag.
+        Tests tagging logic.
         """
         with DatabaseLayer(':memory:') as db:
             db.insert('business', b'test', 12.34, (
