@@ -179,3 +179,23 @@ class DatabaseLayer(object):
         cursor = self.connection.cursor()
         cursor.execute('SELECT * FROM Tag')
         return FetchGenerator(cursor)
+
+class BusinessFilter(object):
+    """
+    Filters receipts based on their business name.
+    """
+
+    def __init__(self, database):
+        """
+        Initialize self. See help(type(self)) for accurate signature.
+        """
+        self.database = database
+
+    def __call__(self, name):
+        """
+        Retrieves receipt transactions from the database.
+        """
+        cursor = self.database.connection.cursor()
+        cursor.execute('SELECT * FROM Receipt WHERE business_name == ?',
+                       (name,))
+        return FetchGenerator(cursor)

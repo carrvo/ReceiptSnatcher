@@ -1,5 +1,9 @@
-from receiptsnatcher.database import DatabaseLayer
+from receiptsnatcher.database import (
+    DatabaseLayer,
+    BusinessFilter,
+)
 
 __all__ = [
     'DatabaseLayer',
+    'BusinessFilter',
 ]

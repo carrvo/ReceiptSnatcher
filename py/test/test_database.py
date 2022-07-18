@@ -4,7 +4,10 @@ Tests.
 
 import unittest
 
-from receiptsnatcher import DatabaseLayer
+from receiptsnatcher import (
+    DatabaseLayer,
+    BusinessFilter,
+)
 
 class DatabaseTests(unittest.TestCase):
     """
@@ -68,7 +71,8 @@ class DatabaseTests(unittest.TestCase):
             db.add_tag(items[1], 'food / groceries')
             tags = tuple(db.tags)
             filter = BusinessFilter(db)
-            self.assertEqual(filter('business'), receipts[0])
+            self.assertEqual(tuple(r['id'] for r in filter('business')),
+                             tuple(r['id'] for r in receipts))
             filter = ItemFilter(db)
             self.assertEqual(filter('test integer'), items[1])
             filter = PriceFilter(db, limit=True)
