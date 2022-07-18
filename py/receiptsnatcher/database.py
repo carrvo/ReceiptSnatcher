@@ -219,3 +219,27 @@ class ItemFilter(object):
         cursor.execute('SELECT * FROM Item WHERE name == ?',
                        (name,))
         return FetchGenerator(cursor)
+
+class PriceFilter(object):
+    """
+    Filters items based on their price.
+
+    :limit: When true will act as an upper boundary;
+        when false will act as a lower boundary.
+    """
+
+    def __init__(self, database, *, limit=True):
+        """
+        Initialize self. See help(type(self)) for accurate signature.
+        """
+        self.database = database
+        self.limit = '<' if limit else '>'
+
+    def __call__(self, price):
+        """
+        Retrieves receipt items from the database.
+        """
+        cursor = self.database.connection.cursor()
+        cursor.execute('SELECT * FROM Item WHERE price {} ?'.format(self.limit),
+                       (price,))
+        return FetchGenerator(cursor)
