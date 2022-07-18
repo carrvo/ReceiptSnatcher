@@ -11,6 +11,7 @@ from receiptsnatcher import (
     PriceFilter,
     ReceiptFilter,
     TagFilter,
+    ItemTags,
 )
 
 class DatabaseTests(unittest.TestCase):

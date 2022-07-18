@@ -284,3 +284,24 @@ class TagFilter(object):
         cursor.execute('SELECT * FROM Item WHERE id in (SELECT item FROM Tag WHERE path LIKE ?)',
                        ('{}%'.format(path),))
         return FetchGenerator(cursor)
+
+class ItemTags(object):
+    """
+    Filters tags based on an item.
+    """
+
+    def __init__(self, database):
+        """
+        Initialize self. See help(type(self)) for accurate signature.
+        """
+        self.database = database
+
+    def __call__(self, item):
+        """
+        Retrieves receipt items from the database.
+        """
+        assert isinstance(item, sqlite3.Row)
+        cursor = self.database.connection.cursor()
+        cursor.execute('SELECT path FROM Tag WHERE item in (SELECT id FROM Item WHERE id == ?)',
+                       (item['id'],))
+        return (t['path'] for t in FetchGenerator(cursor))
