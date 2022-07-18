@@ -7,6 +7,7 @@ import unittest
 from receiptsnatcher import (
     DatabaseLayer,
     BusinessFilter,
+    ItemFilter,
 )
 
 class DatabaseTests(unittest.TestCase):
@@ -74,7 +75,8 @@ class DatabaseTests(unittest.TestCase):
             self.assertEqual(tuple(r['id'] for r in filter('business')),
                              tuple(r['id'] for r in receipts))
             filter = ItemFilter(db)
-            self.assertEqual(filter('test integer'), items[1])
+            self.assertEqual(tuple(i['id'] for i in filter('test integer')),
+                             tuple(i['id'] for i in items[1:2]))
             filter = PriceFilter(db, limit=True)
             self.assertEqual(len(filter(1.1)), 2)
             filter = PriceFilter(db, limit=False)

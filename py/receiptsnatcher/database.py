@@ -199,3 +199,23 @@ class BusinessFilter(object):
         cursor.execute('SELECT * FROM Receipt WHERE business_name == ?',
                        (name,))
         return FetchGenerator(cursor)
+
+class ItemFilter(object):
+    """
+    Filters items based on their name.
+    """
+
+    def __init__(self, database):
+        """
+        Initialize self. See help(type(self)) for accurate signature.
+        """
+        self.database = database
+
+    def __call__(self, name):
+        """
+        Retrieves receipt items from the database.
+        """
+        cursor = self.database.connection.cursor()
+        cursor.execute('SELECT * FROM Item WHERE name == ?',
+                       (name,))
+        return FetchGenerator(cursor)
