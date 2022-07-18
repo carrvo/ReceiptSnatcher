@@ -243,3 +243,24 @@ class PriceFilter(object):
         cursor.execute('SELECT * FROM Item WHERE price {} ?'.format(self.limit),
                        (price,))
         return FetchGenerator(cursor)
+
+class ReceiptFilter(object):
+    """
+    Filters items based on their receipt.
+    """
+
+    def __init__(self, database):
+        """
+        Initialize self. See help(type(self)) for accurate signature.
+        """
+        self.database = database
+
+    def __call__(self, receipt):
+        """
+        Retrieves receipt items from the database.
+        """
+        assert isinstance(receipt, sqlite3.Row)
+        cursor = self.database.connection.cursor()
+        cursor.execute('SELECT * FROM Item WHERE receipt == ?',
+                       (receipt['id'],))
+        return FetchGenerator(cursor)

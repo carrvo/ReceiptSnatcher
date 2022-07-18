@@ -9,6 +9,7 @@ from receiptsnatcher import (
     BusinessFilter,
     ItemFilter,
     PriceFilter,
+    ReceiptFilter,
 )
 
 class DatabaseTests(unittest.TestCase):
@@ -83,7 +84,8 @@ class DatabaseTests(unittest.TestCase):
             filter = PriceFilter(db, limit=False)
             self.assertEqual(len(tuple(filter(1.1))), 2)
             filter = ReceiptFilter(db)
-            self.assertEqual(filter(receipts[0]), items)
+            self.assertEqual(tuple(i['id'] for i in filter(receipts[0])),
+                             tuple(i['id'] for i in items))
             filter = TagFilter(db)
             self.assertEqual(filter('food / groceries'), items[0:1])
             filter = ItemTags(db)
