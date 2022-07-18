@@ -264,3 +264,23 @@ class ReceiptFilter(object):
         cursor.execute('SELECT * FROM Item WHERE receipt == ?',
                        (receipt['id'],))
         return FetchGenerator(cursor)
+
+class TagFilter(object):
+    """
+    Filters items based on a tag.
+    """
+
+    def __init__(self, database):
+        """
+        Initialize self. See help(type(self)) for accurate signature.
+        """
+        self.database = database
+
+    def __call__(self, path):
+        """
+        Retrieves receipt items from the database.
+        """
+        cursor = self.database.connection.cursor()
+        cursor.execute('SELECT * FROM Item WHERE id in (SELECT item FROM Tag WHERE path LIKE ?)',
+                       ('{}%'.format(path),))
+        return FetchGenerator(cursor)
