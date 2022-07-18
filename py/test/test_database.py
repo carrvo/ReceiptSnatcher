@@ -74,7 +74,6 @@ class DatabaseTests(unittest.TestCase):
             items = tuple(db.items)
             db.add_tag(items[0], 'food / groceries')
             db.add_tag(items[1], 'food / groceries')
-            tags = tuple(db.tags)
             filter = BusinessFilter(db)
             self.assertEqual(tuple(r['id'] for r in filter('business')),
                              tuple(r['id'] for r in receipts))
