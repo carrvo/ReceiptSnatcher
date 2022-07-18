@@ -139,6 +139,20 @@ class DatabaseLayer(object):
                        (item['id'], path))
         cursor.close()
 
+    def remove_tag(self, item, path):
+        """
+        Removes an existing tag from the database.
+
+        :item: The item object to tag.
+        :path: A path that uniquely identifies the tag
+            (use ` / ` to denote sub-tags).
+        """
+        assert isinstance(item, sqlite3.Row)
+        cursor = self.connection.cursor()
+        cursor.execute('DELETE FROM Tag WHERE item == ? AND path == ?',
+                       (item['id'], path))
+        cursor.close()
+
     @property
     def receipts(self):
         """

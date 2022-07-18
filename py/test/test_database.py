@@ -49,3 +49,5 @@ class DatabaseTests(unittest.TestCase):
             self.assertEqual(tags[0]['path'], 'food / groceries')
             self.assertEqual(tags[1]['item'], items[1]['id'])
             self.assertEqual(tags[1]['path'], 'food / groceries')
+            db.remove_tag(items[0], 'food / groceries')
+            self.assertEqual(tuple(db.tags)[0]['item'], items[1]['id'])
