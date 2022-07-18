@@ -75,22 +75,17 @@ class DatabaseTests(unittest.TestCase):
             db.add_tag(items[0], 'food / groceries')
             db.add_tag(items[1], 'food / groceries')
             filter = BusinessFilter(db)
-            self.assertEqual(tuple(r['id'] for r in filter('business')),
-                             tuple(r['id'] for r in receipts))
+            self.assertEqual(filter('business'), receipts)
             filter = ItemFilter(db)
-            self.assertEqual(tuple(i['id'] for i in filter('test integer')),
-                             tuple(i['id'] for i in items[1:2]))
+            self.assertEqual(filter('test integer'), items[1:2])
             filter = PriceFilter(db, limit=True)
             self.assertEqual(len(tuple(filter(5.0))), 2)
             filter = PriceFilter(db, limit=False)
             self.assertEqual(len(tuple(filter(1.1))), 2)
             filter = ReceiptFilter(db)
-            self.assertEqual(tuple(i['id'] for i in filter(receipts[0])),
-                             tuple(i['id'] for i in items))
+            self.assertEqual(filter(receipts[0]), items)
             filter = TagFilter(db)
-            self.assertEqual(tuple(i['id'] for i in filter('food / groceries')),
-                             tuple(i['id'] for i in items[0:2]))
-            self.assertEqual(tuple(i['id'] for i in filter('food')),
-                             tuple(i['id'] for i in items[0:2]))
+            self.assertEqual(filter('food / groceries'), items[0:2])
+            self.assertEqual(filter('food'), items[0:2])
             filter = ItemTags(db)
             self.assertEqual(tuple(filter(items[1]))[0], 'food / groceries')

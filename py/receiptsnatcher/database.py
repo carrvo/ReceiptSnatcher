@@ -43,6 +43,31 @@ class FetchGenerator(object):
             raise StopIteration
         return row
 
+    def __eq__(self, value):
+        """
+        Return self==value.
+        """
+        try:
+            return tuple(
+                row['id']
+                for row
+                in tuple(self)
+            ) == tuple(
+                row['id']
+                for row
+                in tuple(value)
+            )
+        except KeyError:
+            return tuple(
+                {'path':row['path'], 'item':row['item']}
+                for row
+                in tuple(self)
+            ) == tuple(
+                {'path':row['path'], 'item':row['item']}
+                for row
+                in tuple(value)
+            )
+
     def __del__(self):
         """
         Cleanup.
