@@ -257,33 +257,33 @@ class ItemFilter(object):
 class PriceFilter(object):
     """
     Filters items based on their price.
-
-    :limit: When true will act as an upper boundary;
-        when false will act as a lower boundary.
     """
 
-    def __init__(self, database, *, limit=True):
+    def __init__(self, database):
         """
         Initialize self. See help(type(self)) for accurate signature.
         """
         self.database = database
-        self.limit = '<' if limit else '>'
 
-    def _filter_items(self, *, price, criteria=tuple(), values=tuple(), **kwargs):
+    def _filter_items(self, *, lower_price_boundary=None, upper_price_boundary=None, criteria=tuple(), values=tuple(), **kwargs):
         """
         Retrieves receipt items from the database.
         """
         criteria = list(criteria)
         values = list(values)
-        criteria.append('price {} ?'.format(self.limit))
-        values.append(price)
+        if lower_price_boundary is not None:
+            criteria.append('price > ?')
+            values.append(lower_price_boundary)
+        if upper_price_boundary is not None:
+            criteria.append('price < ?')
+            values.append(upper_price_boundary)
         return self.database._filter_items(criteria=criteria, values=values, **kwargs)
 
-    def __call__(self, *, price, **kwargs):
+    def __call__(self, *, lower_price_boundary=None, upper_price_boundary=None, **kwargs):
         """
         Retrieves receipt items from the database.
         """
-        return self._filter_items(price=price, **kwargs)
+        return self._filter_items(lower_price_boundary=lower_price_boundary, upper_price_boundary=upper_price_boundary, **kwargs)
 
 class ReceiptFilter(object):
     """

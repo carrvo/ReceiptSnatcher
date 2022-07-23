@@ -83,10 +83,9 @@ class DatabaseTests(unittest.TestCase):
             self.assertEqual(filter('business'), receipts)
             filter = ItemFilter(db)
             self.assertEqual(filter(name='test integer'), items[1:2])
-            filter = PriceFilter(db, limit=True)
-            self.assertEqual(len(tuple(filter(price=5.0))), 2)
-            filter = PriceFilter(db, limit=False)
-            self.assertEqual(len(tuple(filter(price=1.1))), 2)
+            filter = PriceFilter(db)
+            self.assertEqual(len(tuple(filter(upper_price_boundary=5.0))), 2)
+            self.assertEqual(len(tuple(filter(lower_price_boundary=1.1))), 2)
             filter = ReceiptFilter(db)
             self.assertEqual(filter(receipt=receipts[0]), items)
             filter = TagFilter(db)
@@ -111,11 +110,11 @@ class DatabaseTests(unittest.TestCase):
             items = tuple(db.items)
             db.add_tag(items[0], 'food / groceries')
             db.add_tag(items[1], 'food / groceries')
-            filter = ItemFilter(TagFilter(PriceFilter(DateFilter(ReceiptFilter(db)), limit=True)))
+            filter = ItemFilter(TagFilter(PriceFilter(DateFilter(ReceiptFilter(db)))))
             self.assertEqual(filter(
                 receipt=receipts[0],
                 date=DatabaseTests.today,
-                price=5.0,
+                upper_price_boundary=5.0,
                 path='food',
                 name='test float'
             ), items[0:1])
