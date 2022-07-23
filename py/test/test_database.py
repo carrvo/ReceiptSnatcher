@@ -14,8 +14,6 @@ from receiptsnatcher import (
     TagFilter,
     ItemTags,
     DateFilter,
-    AndFilterClause,
-    OrFilterClause,
 )
 
 class DatabaseTests(unittest.TestCase):
@@ -121,34 +119,3 @@ class DatabaseTests(unittest.TestCase):
                 path='food',
                 name='test float'
             ), items[0:1])
-
-    def test_complex_filters(self):
-        """
-        Tests filtering logic with clauses (AND, OR).
-        """
-        with DatabaseLayer(':memory:') as db:
-            db.insert('business', b'test', DatabaseTests.today, 12.34, (
-                {'name':'test float', 'price':1.34},
-                {'name':'test integer', 'price':10},
-                {'name':'test too many digits', 'price':1.00003}
-            ))
-            receipts = tuple(db.receipts)
-            items = tuple(db.items)
-            db.add_tag(items[0], 'food / groceries')
-            db.add_tag(items[1], 'food / groceries')
-            filter = AndFilterClause(db, ItemFilter(None), TagFilter(None), PriceFilter(None, limit=True), DateFilter(None), ReceiptFilter(None))
-            self.assertEqual(filter(
-                receipt=receipts[0],
-                date=DatabaseTests.today,
-                price=5.0,
-                path='food',
-                name='test float'
-            ), items[0:1])
-            filter = OrFilterClause(db, AndFilterClause(db, ItemFilter(None), TagFilter(None), PriceFilter(None, limit=True)), DateFilter(None), ReceiptFilter(None))
-            self.assertEqual(filter(
-                receipt=receipts[0],
-                date=DatabaseTests.today,
-                price=5.0,
-                path='food',
-                name='test float'
-            ), items)
