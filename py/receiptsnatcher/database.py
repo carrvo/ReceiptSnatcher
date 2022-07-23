@@ -387,3 +387,77 @@ class DateFilter(object):
         Retrieves receipt items from the database.
         """
         return self._filter_items(date=date, **kwargs)
+
+class AndFilterClause(object):
+
+    class AndClause(object):
+
+        def __init__(self, *filters):
+            self.filters = filters
+            for filt in self.filters:
+                filt.database = self
+            self.criteria = []
+            self.values = []
+
+        def _filter_items(self, *, criteria=tuple(), values=tuple(), **kwargs):
+            for cri in criteria:
+                self.criteria.append(cri)
+            for val in values:
+                self.values.append(val)
+
+        def __call__(self, **kwargs):
+            for filt in self.filters:
+                filt._filter_items(**kwargs)
+
+    def __init__(self, database, *filters):
+        self.database = database
+        self.clause = AndFilterClause.AndClause(*filters)
+
+    def _filter_items(self, *, criteria=tuple(), values=tuple(), **kwargs):
+        self.clause(**kwargs)
+        criteria = [' AND '.join(self.clause.criteria)]
+        values = self.clause.values
+        return self.database._filter_items(criteria=criteria, values=values, **kwargs)
+
+    def __call__(self, **kwargs):
+        """
+        Retrieves receipt items from the database.
+        """
+        return self._filter_items(**kwargs)
+
+class OrFilterClause(object):
+
+    class OrClause(object):
+
+        def __init__(self, *filters):
+            self.filters = filters
+            for filt in self.filters:
+                filt.database = self
+            self.criteria = []
+            self.values = []
+
+        def _filter_items(self, *, criteria=tuple(), values=tuple(), **kwargs):
+            for cri in criteria:
+                self.criteria.append(cri)
+            for val in values:
+                self.values.append(val)
+
+        def __call__(self, **kwargs):
+            for filt in self.filters:
+                filt._filter_items(**kwargs)
+
+    def __init__(self, database, *filters):
+        self.database = database
+        self.clause = OrFilterClause.OrClause(*filters)
+
+    def _filter_items(self, *, criteria=tuple(), values=tuple(), **kwargs):
+        self.clause(**kwargs)
+        criteria = [' OR '.join(self.clause.criteria)]
+        values = self.clause.values
+        return self.database._filter_items(criteria=criteria, values=values, **kwargs)
+
+    def __call__(self, **kwargs):
+        """
+        Retrieves receipt items from the database.
+        """
+        return self._filter_items(**kwargs)
