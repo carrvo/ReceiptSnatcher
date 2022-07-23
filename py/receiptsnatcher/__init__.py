@@ -6,6 +6,7 @@ from receiptsnatcher.database import (
     ReceiptFilter,
     TagFilter,
     ItemTags,
+    DateFilter,
 )
 
 __all__ = [
@@ -16,4 +17,5 @@ __all__ = [
     'ReceiptFilter',
     'TagFilter',
     'ItemTags',
+    'DateFilter',
 ]

@@ -3,6 +3,7 @@ Tests.
 """
 
 import unittest
+import datetime
 
 from receiptsnatcher import (
     DatabaseLayer,
@@ -12,6 +13,7 @@ from receiptsnatcher import (
     ReceiptFilter,
     TagFilter,
     ItemTags,
+    DateFilter,
 )
 
 class DatabaseTests(unittest.TestCase):
@@ -19,12 +21,14 @@ class DatabaseTests(unittest.TestCase):
     Tests for the DatabaseLayer.
     """
 
+    today = datetime.date.today()
+
     def test_insert(self):
         """
         Tests the insert against its retrieval.
         """
         with DatabaseLayer(':memory:') as db:
-            db.insert('business', b'test', 12.34, (
+            db.insert('business', b'test', DatabaseTests.today, 12.34, (
                 {'name':'test float', 'price':1.34},
                 {'name':'test integer', 'price':10},
                 {'name':'test too many digits', 'price':1.00003}
@@ -36,6 +40,7 @@ class DatabaseTests(unittest.TestCase):
             items = tuple(db.items)
             self.assertEqual(items[0]['name'], 'test float')
             self.assertEqual(items[0]['price'], 1.34)
+            self.assertEqual(items[0]['date'], DatabaseTests.today)
             self.assertEqual(items[1]['price'], 10.0)
             self.assertEqual(items[2]['price'], 1.0)
 
@@ -44,7 +49,7 @@ class DatabaseTests(unittest.TestCase):
         Tests tagging logic.
         """
         with DatabaseLayer(':memory:') as db:
-            db.insert('business', b'test', 12.34, (
+            db.insert('business', b'test', DatabaseTests.today, 12.34, (
                 {'name':'test float', 'price':1.34},
                 {'name':'test integer', 'price':10},
                 {'name':'test too many digits', 'price':1.00003}
@@ -65,7 +70,7 @@ class DatabaseTests(unittest.TestCase):
         Tests filtering logic.
         """
         with DatabaseLayer(':memory:') as db:
-            db.insert('business', b'test', 12.34, (
+            db.insert('business', b'test', DatabaseTests.today, 12.34, (
                 {'name':'test float', 'price':1.34},
                 {'name':'test integer', 'price':10},
                 {'name':'test too many digits', 'price':1.00003}
@@ -89,3 +94,5 @@ class DatabaseTests(unittest.TestCase):
             self.assertEqual(filter('food'), items[0:2])
             filter = ItemTags(db)
             self.assertEqual(tuple(filter(items[1]))[0], 'food / groceries')
+            filter = DateFilter(db)
+            self.assertEqual(filter(DatabaseTests.today), items)
