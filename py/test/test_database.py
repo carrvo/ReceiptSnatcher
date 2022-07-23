@@ -82,17 +82,40 @@ class DatabaseTests(unittest.TestCase):
             filter = BusinessFilter(db)
             self.assertEqual(filter('business'), receipts)
             filter = ItemFilter(db)
-            self.assertEqual(filter('test integer'), items[1:2])
+            self.assertEqual(filter(name='test integer'), items[1:2])
             filter = PriceFilter(db, limit=True)
-            self.assertEqual(len(tuple(filter(5.0))), 2)
+            self.assertEqual(len(tuple(filter(price=5.0))), 2)
             filter = PriceFilter(db, limit=False)
-            self.assertEqual(len(tuple(filter(1.1))), 2)
+            self.assertEqual(len(tuple(filter(price=1.1))), 2)
             filter = ReceiptFilter(db)
-            self.assertEqual(filter(receipts[0]), items)
+            self.assertEqual(filter(receipt=receipts[0]), items)
             filter = TagFilter(db)
-            self.assertEqual(filter('food / groceries'), items[0:2])
-            self.assertEqual(filter('food'), items[0:2])
+            self.assertEqual(filter(path='food / groceries'), items[0:2])
+            self.assertEqual(filter(path='food'), items[0:2])
             filter = ItemTags(db)
             self.assertEqual(tuple(filter(items[1]))[0], 'food / groceries')
             filter = DateFilter(db)
-            self.assertEqual(filter(DatabaseTests.today), items)
+            self.assertEqual(filter(date=DatabaseTests.today), items)
+
+    def test_layered_filters(self):
+        """
+        Tests filtering logic with filters layered on top of each other.
+        """
+        with DatabaseLayer(':memory:') as db:
+            db.insert('business', b'test', DatabaseTests.today, 12.34, (
+                {'name':'test float', 'price':1.34},
+                {'name':'test integer', 'price':10},
+                {'name':'test too many digits', 'price':1.00003}
+            ))
+            receipts = tuple(db.receipts)
+            items = tuple(db.items)
+            db.add_tag(items[0], 'food / groceries')
+            db.add_tag(items[1], 'food / groceries')
+            filter = ItemFilter(TagFilter(PriceFilter(DateFilter(ReceiptFilter(db)), limit=True)))
+            self.assertEqual(filter(
+                receipt=receipts[0],
+                date=DatabaseTests.today,
+                price=5.0,
+                path='food',
+                name='test float'
+            ), items[0:1])

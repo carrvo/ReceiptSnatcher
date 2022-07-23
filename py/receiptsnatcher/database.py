@@ -188,6 +188,16 @@ class DatabaseLayer(object):
         cursor.execute('SELECT * FROM Item')
         return FetchGenerator(cursor, 'id')
 
+    def _filter_items(self, *, criteria, values, **kargs):
+        """
+        Retrieves receipt items from the database.
+        """
+        cursor = self.connection.cursor()
+        cursor.execute('SELECT * FROM Item WHERE {}'
+                       ''.format(' AND '.join(criteria)),
+                       values)
+        return FetchGenerator(cursor, 'id')
+
     @property
     def tags(self):
         """
@@ -228,14 +238,21 @@ class ItemFilter(object):
         """
         self.database = database
 
-    def __call__(self, name):
+    def _filter_items(self, *, name, criteria=tuple(), values=tuple(), **kwargs):
         """
         Retrieves receipt items from the database.
         """
-        cursor = self.database.connection.cursor()
-        cursor.execute('SELECT * FROM Item WHERE name == ?',
-                       (name,))
-        return FetchGenerator(cursor, 'id')
+        criteria = list(criteria)
+        values = list(values)
+        criteria.append('name == ?')
+        values.append(name)
+        return self.database._filter_items(criteria=criteria, values=values, **kwargs)
+
+    def __call__(self, *, name, **kwargs):
+        """
+        Retrieves receipt items from the database.
+        """
+        return self._filter_items(name=name, **kwargs)
 
 class PriceFilter(object):
     """
@@ -252,14 +269,21 @@ class PriceFilter(object):
         self.database = database
         self.limit = '<' if limit else '>'
 
-    def __call__(self, price):
+    def _filter_items(self, *, price, criteria=tuple(), values=tuple(), **kwargs):
         """
         Retrieves receipt items from the database.
         """
-        cursor = self.database.connection.cursor()
-        cursor.execute('SELECT * FROM Item WHERE price {} ?'.format(self.limit),
-                       (price,))
-        return FetchGenerator(cursor, 'id')
+        criteria = list(criteria)
+        values = list(values)
+        criteria.append('price {} ?'.format(self.limit))
+        values.append(price)
+        return self.database._filter_items(criteria=criteria, values=values, **kwargs)
+
+    def __call__(self, *, price, **kwargs):
+        """
+        Retrieves receipt items from the database.
+        """
+        return self._filter_items(price=price, **kwargs)
 
 class ReceiptFilter(object):
     """
@@ -272,15 +296,22 @@ class ReceiptFilter(object):
         """
         self.database = database
 
-    def __call__(self, receipt):
+    def _filter_items(self, *, receipt, criteria=tuple(), values=tuple(), **kwargs):
         """
         Retrieves receipt items from the database.
         """
+        criteria = list(criteria)
+        values = list(values)
         assert isinstance(receipt, sqlite3.Row)
-        cursor = self.database.connection.cursor()
-        cursor.execute('SELECT * FROM Item WHERE receipt == ?',
-                       (receipt['id'],))
-        return FetchGenerator(cursor, 'id')
+        criteria.append('receipt == ?')
+        values.append(receipt['id'])
+        return self.database._filter_items(criteria=criteria, values=values, **kwargs)
+
+    def __call__(self, *, receipt, **kwargs):
+        """
+        Retrieves receipt items from the database.
+        """
+        return self._filter_items(receipt=receipt, **kwargs)
 
 class TagFilter(object):
     """
@@ -293,14 +324,21 @@ class TagFilter(object):
         """
         self.database = database
 
-    def __call__(self, path):
+    def _filter_items(self, *, path, criteria=tuple(), values=tuple(), **kwargs):
         """
         Retrieves receipt items from the database.
         """
-        cursor = self.database.connection.cursor()
-        cursor.execute('SELECT * FROM Item WHERE id in (SELECT item FROM Tag WHERE path LIKE ?)',
-                       ('{}%'.format(path),))
-        return FetchGenerator(cursor, 'id')
+        criteria = list(criteria)
+        values = list(values)
+        criteria.append('id in (SELECT item FROM Tag WHERE path LIKE ?)')
+        values.append('{}%'.format(path))
+        return self.database._filter_items(criteria=criteria, values=values, **kwargs)
+
+    def __call__(self, *, path, **kwargs):
+        """
+        Retrieves receipt items from the database.
+        """
+        return self._filter_items(path=path, **kwargs)
 
 class ItemTags(object):
     """
@@ -334,11 +372,18 @@ class DateFilter(object):
         """
         self.database = database
 
-    def __call__(self, date):
+    def _filter_items(self, *, date, criteria=tuple(), values=tuple(), **kwargs):
         """
         Retrieves receipt items from the database.
         """
-        cursor = self.database.connection.cursor()
-        cursor.execute('SELECT * FROM Item WHERE date == ?',
-                       (date,))
-        return FetchGenerator(cursor, 'id')
+        criteria = list(criteria)
+        values = list(values)
+        criteria.append('date == ?')
+        values.append(date)
+        return self.database._filter_items(criteria=criteria, values=values, **kwargs)
+
+    def __call__(self, *, date, **kwargs):
+        """
+        Retrieves receipt items from the database.
+        """
+        return self._filter_items(date=date, **kwargs)
