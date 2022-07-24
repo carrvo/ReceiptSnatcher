@@ -372,18 +372,22 @@ class DateFilter(object):
         """
         self.database = database
 
-    def _filter_items(self, *, date, criteria=tuple(), values=tuple(), **kwargs):
+    def _filter_items(self, *, lower_date_boundary=None, upper_date_boundary=None, criteria=tuple(), values=tuple(), **kwargs):
         """
         Retrieves receipt items from the database.
         """
         criteria = list(criteria)
         values = list(values)
-        criteria.append('date == ?')
-        values.append(date)
+        if lower_date_boundary is not None:
+            criteria.append('date >= ?')
+            values.append(lower_date_boundary)
+        if upper_date_boundary is not None:
+            criteria.append('date <= ?')
+            values.append(upper_date_boundary)
         return self.database._filter_items(criteria=criteria, values=values, **kwargs)
 
-    def __call__(self, *, date, **kwargs):
+    def __call__(self, *, lower_date_boundary=None, upper_date_boundary=None, **kwargs):
         """
         Retrieves receipt items from the database.
         """
-        return self._filter_items(date=date, **kwargs)
+        return self._filter_items(lower_date_boundary=lower_date_boundary, upper_date_boundary=upper_date_boundary, **kwargs)

@@ -22,6 +22,8 @@ class DatabaseTests(unittest.TestCase):
     """
 
     today = datetime.date.today()
+    yesterday = today - datetime.timedelta(days=1)
+    tomorrow = today + datetime.timedelta(days=1)
 
     def test_insert(self):
         """
@@ -94,7 +96,8 @@ class DatabaseTests(unittest.TestCase):
             filter = ItemTags(db)
             self.assertEqual(tuple(filter(items[1]))[0], 'food / groceries')
             filter = DateFilter(db)
-            self.assertEqual(filter(date=DatabaseTests.today), items)
+            self.assertEqual(filter(lower_date_boundary=DatabaseTests.yesterday), items)
+            self.assertEqual(filter(upper_date_boundary=DatabaseTests.tomorrow), items)
 
     def test_layered_filters(self):
         """
