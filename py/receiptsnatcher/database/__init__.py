@@ -1,4 +1,6 @@
-
+"""
+Provides database backend logic.
+"""
 
 from receiptsnatcher.database.sql import (
     DatabaseLayer,
