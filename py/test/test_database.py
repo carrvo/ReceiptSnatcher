@@ -31,18 +31,18 @@ class DatabaseTests(unittest.TestCase):
         """
         with DatabaseLayer(':memory:') as db:
             db.insert('business', b'test', DatabaseTests.today, 12.34, (
-                {'name':'test float', 'price':1.34},
-                {'name':'test integer', 'price':10},
-                {'name':'test too many digits', 'price':1.00003}
+                {'product_identifier':'test float', 'price':1.34},
+                {'product_identifier':'test integer', 'price':10},
+                {'product_identifier':'test too many digits', 'price':1.00003}
             ))
             receipts = tuple(db.receipts)
             self.assertEqual(receipts[0]['business_name'], 'business')
             self.assertEqual(receipts[0]['image'], b'test')
             self.assertEqual(receipts[0]['total'], 12.34)
             items = tuple(db.items)
-            self.assertEqual(items[0]['name'], 'test float')
+            self.assertEqual(items[0]['product_identifier'], 'test float')
             self.assertEqual(items[0]['price'], 1.34)
-            self.assertEqual(items[0]['date'], DatabaseTests.today)
+            self.assertEqual(items[0]['transation_date'], DatabaseTests.today)
             self.assertEqual(items[1]['price'], 10.0)
             self.assertEqual(items[2]['price'], 1.0)
 
@@ -52,9 +52,9 @@ class DatabaseTests(unittest.TestCase):
         """
         with DatabaseLayer(':memory:') as db:
             db.insert('business', b'test', DatabaseTests.today, 12.34, (
-                {'name':'test float', 'price':1.34},
-                {'name':'test integer', 'price':10},
-                {'name':'test too many digits', 'price':1.00003}
+                {'product_identifier':'test float', 'price':1.34},
+                {'product_identifier':'test integer', 'price':10},
+                {'product_identifier':'test too many digits', 'price':1.00003}
             ))
             items = tuple(db.items)
             db.add_tag(items[0], 'food / groceries')
@@ -73,9 +73,9 @@ class DatabaseTests(unittest.TestCase):
         """
         with DatabaseLayer(':memory:') as db:
             db.insert('business', b'test', DatabaseTests.today, 12.34, (
-                {'name':'test float', 'price':1.34},
-                {'name':'test integer', 'price':10},
-                {'name':'test too many digits', 'price':1.00003}
+                {'product_identifier':'test float', 'price':1.34},
+                {'product_identifier':'test integer', 'price':10},
+                {'product_identifier':'test too many digits', 'price':1.00003}
             ))
             receipts = tuple(db.receipts)
             items = tuple(db.items)
@@ -84,7 +84,7 @@ class DatabaseTests(unittest.TestCase):
             filter = BusinessFilter(db)
             self.assertEqual(filter(name='business'), receipts)
             filter = ItemFilter(db)
-            self.assertEqual(filter(name='test integer'), items[1:2])
+            self.assertEqual(filter(product_identifier='test integer'), items[1:2])
             filter = PriceFilter(db)
             self.assertEqual(len(tuple(filter(upper_price_boundary=5.0))), 2)
             self.assertEqual(len(tuple(filter(lower_price_boundary=1.1))), 2)
@@ -105,9 +105,9 @@ class DatabaseTests(unittest.TestCase):
         """
         with DatabaseLayer(':memory:') as db:
             db.insert('business', b'test', DatabaseTests.today, 12.34, (
-                {'name':'test float', 'price':1.34},
-                {'name':'test integer', 'price':10},
-                {'name':'test too many digits', 'price':1.00003}
+                {'product_identifier':'test float', 'price':1.34},
+                {'product_identifier':'test integer', 'price':10},
+                {'product_identifier':'test too many digits', 'price':1.00003}
             ))
             receipts = tuple(db.receipts)
             items = tuple(db.items)
@@ -119,5 +119,5 @@ class DatabaseTests(unittest.TestCase):
                 date=DatabaseTests.today,
                 upper_price_boundary=5.0,
                 path='food',
-                name='test float'
+                product_identifier='test float'
             ), items[0:1])

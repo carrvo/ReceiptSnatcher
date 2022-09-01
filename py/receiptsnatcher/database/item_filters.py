@@ -15,21 +15,21 @@ class ItemFilter(object):
         """
         self.database = database
 
-    def _filter_items(self, *, name, criteria=tuple(), values=tuple(), **kwargs):
+    def _filter_items(self, *, product_identifier, criteria=tuple(), values=tuple(), **kwargs):
         """
         Retrieves receipt items from the database.
         """
         criteria = list(criteria)
         values = list(values)
-        criteria.append('name == ?')
-        values.append(name)
+        criteria.append('product_identifier == ?')
+        values.append(product_identifier)
         return self.database._filter_items(criteria=criteria, values=values, **kwargs)
 
-    def __call__(self, *, name, **kwargs):
+    def __call__(self, *, product_identifier, **kwargs):
         """
         Retrieves receipt items from the database.
         """
-        return self._filter_items(name=name, **kwargs)
+        return self._filter_items(product_identifier=product_identifier, **kwargs)
 
 class PriceFilter(object):
     """
@@ -119,7 +119,7 @@ class TagFilter(object):
 
 class DateFilter(object):
     """
-    Filters items based on their date.
+    Filters items based on their transation date.
     """
 
     def __init__(self, database):
@@ -135,10 +135,10 @@ class DateFilter(object):
         criteria = list(criteria)
         values = list(values)
         if lower_date_boundary is not None:
-            criteria.append('date >= ?')
+            criteria.append('transation_date >= ?')
             values.append(lower_date_boundary)
         if upper_date_boundary is not None:
-            criteria.append('date <= ?')
+            criteria.append('transation_date <= ?')
             values.append(upper_date_boundary)
         return self.database._filter_items(criteria=criteria, values=values, **kwargs)
 

@@ -91,8 +91,8 @@ class DatabaseLayer(object):
         ''')
         cursor.execute('''CREATE TABLE IF NOT EXISTS Item (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT NOT NULL,
-            date DATE NOT NULL,
+            product_identifier TEXT NOT NULL,
+            transation_date DATE NOT NULL,
             price REAL NOT NULL CHECK(price>0),
             quantity REAL CHECK(quantity>0),
             receipt INTEGER NOT NULL,
@@ -115,16 +115,16 @@ class DatabaseLayer(object):
         """
         self.connection.close()
 
-    def insert(self, business_name, image, date, total, row_dicts):
+    def insert(self, business_name, image, transation_date, total, row_dicts):
         """
         Inserts a new receipt information into the database.
 
         :business_name: The name of the business the transaction took place with.
         :image: The legal document from which the information was obtained.
-        :date: The transaction date.
+        :transation_date: The transaction date.
         :total: The transaction total.
         :row_dicts: A list of dictionaries, each representing a row.
-            :name: The item name.
+            :product_identifier: The item name.
             :price: The monetary value of the item.
             :quantity: [optional] The amount of the item.
         """
@@ -134,9 +134,9 @@ class DatabaseLayer(object):
         cursor.execute('INSERT INTO Receipt(business_name, image, total) values(?, ?, ?)',
                         (business_name, image, round_monetary(total)))
         receipt_id = cursor.lastrowid
-        cursor.executemany('INSERT INTO Item(name, date, price, quantity, receipt) values(?, ?, ?, ?, ?)',
+        cursor.executemany('INSERT INTO Item(product_identifier, transation_date, price, quantity, receipt) values(?, ?, ?, ?, ?)',
                            (
-                                (row.get('name'), date, round_monetary(row.get('price')), row.get('quantity'), receipt_id)
+                                (row.get('product_identifier'), transation_date, round_monetary(row.get('price')), row.get('quantity'), receipt_id)
                                 for row
                                 in row_dicts
                            ))
