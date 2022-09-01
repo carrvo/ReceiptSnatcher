@@ -84,17 +84,19 @@ class DatabaseLayer(object):
         cursor = self.connection.cursor()
         cursor.execute('''CREATE TABLE IF NOT EXISTS Receipt (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            business_name TEXT NOT NULL,
+            -- The fields here are what cannot be applied to a Item
+            -- because the Item table has the statistical significance.
+            business_name TEXT NOT NULL, -- This is the business of purchase, not manufacture.
             image BLOB NOT NULL,
             total REAL NOT NULL CHECK(total>0)
         )
         ''')
         cursor.execute('''CREATE TABLE IF NOT EXISTS Item (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            product_identifier TEXT NOT NULL,
+            product_identifier TEXT NOT NULL, -- Original receipt text for Item.
             transation_date DATE NOT NULL,
-            price REAL NOT NULL CHECK(price>0),
-            quantity REAL CHECK(quantity>0),
+            price REAL NOT NULL CHECK(price>0), -- Payment price; any Item with quantity can have their price tag re-calculated.
+            quantity REAL CHECK(quantity>0), -- May be unit or unitless, the unit is not stored.
             receipt INTEGER NOT NULL,
             FOREIGN KEY(receipt) REFERENCES Receipt(id)
         )
