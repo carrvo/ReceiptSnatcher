@@ -15,6 +15,7 @@ except ImportError:
 import cv2
 import pytesseract
 
+DEBUG = False
 
 def pdf_to_img(pdf_file):
     return pdf2image.convert_from_path(pdf_file)
@@ -26,10 +27,18 @@ def ocr_core(file):
     return text.split('\n')
 
 
-def pages(pdf_file):
-    images = pdf_to_img(pdf_file)
-    for pg, img in enumerate(images):
-        yield ocr_core(img)
+def file_to_pages(filepath):
+    if filepath.endswith('pdf'):
+        images = pdf_to_img(filepath)
+        return tuple(
+            line # kudos to https://stackoverflow.com/a/952952
+            for img in images
+            for line in ocr_core(img)
+        )
+    else:
+        # assumes that the images is pre-processed (straightened, et cetera)
+        return ocr_core(cv2.imread(filepath))
+        
 
 class NotFound:
     def __init__(self):
@@ -56,22 +65,19 @@ class Costco(NotFound):
 
 def parse(pages):
     pages = tuple(pages)
-    header = pages[0][0]
+    header = pages[0]
     for parser in (Safeway(), Costco(), NotFound()):
         if re.search(parser.name, header):
             break
-    for page in pages:
-        for line in page:
-            row = parser.item_row.search(line)
-            if row:
-                parsed = {field: row.group(field) for field in parser.fields}
-                if DEBUG:
-                    parsed.update({'line': line})
-                yield parsed
-            elif parser.stop_row.search(line):
-                return #StopIteration()
-
-DEBUG = False
+    for line in pages:
+        row = parser.item_row.search(line)
+        if row:
+            parsed = {field: row.group(field) for field in parser.fields}
+            if DEBUG:
+                parsed.update({'line': line})
+            yield parsed
+        elif parser.stop_row.search(line):
+            return #StopIteration()
 
 if __name__ == '__main__':
     #global DEBUG
@@ -82,12 +88,8 @@ if __name__ == '__main__':
     args = parser.parse_args()
     if args.verbose:
         DEBUG = True
-    pages = pages(args.filepath) if args.filepath.endswith('pdf') else (ocr_core(cv2.imread(args.filepath)),) # assumes that the images is pre-processed (straightened, et cetera)
-    rows = (
-        r # kudos to https://stackoverflow.com/a/952952
-        for p in pages
-        for r in p
-    ) if args.raw else parse(pages)
+    pages = file_to_pages(args.filepath)
+    rows = pages if args.raw else parse(pages)
     for row in rows:
         print(row)
 
