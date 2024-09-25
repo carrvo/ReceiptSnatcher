@@ -81,7 +81,7 @@ def parse(pages):
     for line in pages:
         row = parser.item_row.search(line)
         if row:
-            parsed = {field: row.group(field) for field in parser.fields}
+            parsed = {field: row.group(field).replace('$', '') for field in parser.fields}
             if DEBUG:
                 parsed.update({'line': line})
             yield parsed
