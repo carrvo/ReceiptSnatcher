@@ -12,6 +12,7 @@ try:
 except ImportError:
     import Image
 
+import cv2
 import pytesseract
 
 
@@ -22,13 +23,13 @@ def pdf_to_img(pdf_file):
 def ocr_core(file):
     options = "--psm 4"
     text = pytesseract.image_to_string(file, config=options)
-    return text
+    return text.split('\n')
 
 
 def pages(pdf_file):
     images = pdf_to_img(pdf_file)
     for pg, img in enumerate(images):
-        yield ocr_core(img).split('\n')
+        yield ocr_core(img)
 
 class NotFound:
     def __init__(self):
@@ -77,9 +78,16 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("filepath")
     parser.add_argument("--verbose", help="increase output verbosity", action="store_true")
+    parser.add_argument("--raw", help="print the raw text instead of parsing", action="store_true")
     args = parser.parse_args()
     if args.verbose:
         DEBUG = True
-    for row in parse(pages(args.filepath)):
+    pages = pages(args.filepath) if args.filepath.endswith('pdf') else (ocr_core(cv2.imread(args.filepath)),) # assumes that the images is pre-processed (straightened, et cetera)
+    rows = (
+        r # kudos to https://stackoverflow.com/a/952952
+        for p in pages
+        for r in p
+    ) if args.raw else parse(pages)
+    for row in rows:
         print(row)
 
