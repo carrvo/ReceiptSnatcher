@@ -30,11 +30,25 @@ def pages(pdf_file):
     for pg, img in enumerate(images):
         yield ocr_core(img).split('\n')
 
+'''
+class ItemParser:
+    def __init__(self, parser, pages):
+        self.parser = parser
+        self.pages = pages
+    def __iter__(self):
+        self.page_iter = iter(pages)
+        self.current_page = None
+        self.line_iter = iter(tuple())
+        return self
+    def __next__(self):
+        row = 
+'''
+
 class NotFound:
     def __init__(self):
         self.name = ''
-        self.item_row = re.compile('')
-        self.stop_row = re.compile('')
+        self.item_row = re.compile('\n')
+        self.stop_row = re.compile('.')
 
 class Safeway:
     def __init__(self):
@@ -54,7 +68,7 @@ def parse(pages):
             if row:
                 yield row.group('item', 'price')
             elif parser.stop_row.search(line):
-                raise StopIteration
+                return #StopIteration()
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
