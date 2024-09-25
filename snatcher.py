@@ -41,27 +41,45 @@ class Safeway(NotFound):
     def __init__(self):
         super().__init__()
         self.name = 'SAFEWAY'
-        self.item_row = re.compile('\+?(?P<item>[\w\d\s]+)\s+(?P<price>-?\$\d+(\.\d+)?)')
+        self.item_row = re.compile('\+?(?P<item>\w[\w\d\s]+)\s+(?P<price>-?\$\d+(\.\d+)?)')
         self.stop_row = re.compile('SUBTOTAL')
+
+class Costco(NotFound):
+    def __init__(self):
+        super().__init__()
+        self.name = 'COSTCO'
+        self.item_row = re.compile('(?P<code>\d+)\s+(?P<item>\w[\w\d\s]+)\s+(?P<price>\d+(\.\d+)?)')
+        self.stop_row = re.compile('SUBTOT')
+        if DEBUG:
+            self.fields = ('code', 'item', 'price')
 
 def parse(pages):
     pages = tuple(pages)
     header = pages[0][0]
-    for parser in (Safeway(), NotFound()):
+    for parser in (Safeway(), Costco(), NotFound()):
         if re.search(parser.name, header):
             break
     for page in pages:
         for line in page:
             row = parser.item_row.search(line)
             if row:
-                yield {field: row.group(field) for field in parser.fields}
+                parsed = {field: row.group(field) for field in parser.fields}
+                if DEBUG:
+                    parsed.update({'line': line})
+                yield parsed
             elif parser.stop_row.search(line):
                 return #StopIteration()
 
+DEBUG = False
+
 if __name__ == '__main__':
+    #global DEBUG
     parser = argparse.ArgumentParser()
     parser.add_argument("filepath")
+    parser.add_argument("--verbose", help="increase output verbosity", action="store_true")
     args = parser.parse_args()
+    if args.verbose:
+        DEBUG = True
     for row in parse(pages(args.filepath)):
         print(row)
 
