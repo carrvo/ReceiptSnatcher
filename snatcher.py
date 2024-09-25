@@ -30,28 +30,16 @@ def pages(pdf_file):
     for pg, img in enumerate(images):
         yield ocr_core(img).split('\n')
 
-'''
-class ItemParser:
-    def __init__(self, parser, pages):
-        self.parser = parser
-        self.pages = pages
-    def __iter__(self):
-        self.page_iter = iter(pages)
-        self.current_page = None
-        self.line_iter = iter(tuple())
-        return self
-    def __next__(self):
-        row = 
-'''
-
 class NotFound:
     def __init__(self):
         self.name = ''
         self.item_row = re.compile('\n')
         self.stop_row = re.compile('.')
+        self.fields = ('item', 'price')
 
-class Safeway:
+class Safeway(NotFound):
     def __init__(self):
+        super().__init__()
         self.name = 'SAFEWAY'
         self.item_row = re.compile('\+?(?P<item>[\w\d\s]+)\s+(?P<price>-?\$\d+(\.\d+)?)')
         self.stop_row = re.compile('SUBTOTAL')
@@ -66,7 +54,7 @@ def parse(pages):
         for line in page:
             row = parser.item_row.search(line)
             if row:
-                yield row.group('item', 'price')
+                yield {field: row.group(field) for field in parser.fields}
             elif parser.stop_row.search(line):
                 return #StopIteration()
 
