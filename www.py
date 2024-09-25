@@ -14,6 +14,7 @@ import json
 cgitb.enable(logdir='/var/log/apache2/python-traceback')
 
 import snatcher
+import db
 
 form = cgi.FieldStorage() if os.environ.get('CONTENT_TYPE') != 'application/json' else json.loads(sys.stdin.read(int(os.environ["CONTENT_LENGTH"]))) # FieldStorage says "reading multipart/form-data" ~ /usr/lib/python3.10/cgi.py ; kudos to https://stackoverflow.com/questions/10718572/post-json-to-python-cgi
 #if os.environ.get('CONTENT_TYPE') == 'application/json': # https://bugs.python.org/issue27777
@@ -116,7 +117,10 @@ try:
         else:
             raise ExitWithPage(ERROR.format('No form submitted!', url=URL_PATH))
     elif os.environ['REQUEST_METHOD'] == 'PUT':
-        raise ExitWithData('text/plain', 'Received Data! {}'.format(json.dumps(form)))
+        #raise ExitWithData('text/plain', 'Received Data! {}'.format(json.dumps(form)))
+        with db.DB() as database:
+            row_ids = database.insert(form)
+            raise ExitWithData('application/json', json.dumps(row_ids))
     else:
         raise ExitWithPage(ERROR.format('Unsupported method: {}'.format(os.environ['REQUEST_METHOD']), url=URL_PATH))
 except ExitWithData as exiting:
