@@ -6,9 +6,13 @@ import cgi
 import cgitb
 import os
 
+#import snatcher
+
+# https://serverfault.com/a/515698
+cgitb.enable(logdir='/var/log/apache2/python-traceback')
+
 import snatcher
 
-cgitb.enable()
 form = cgi.FieldStorage()
 
 MAX_FILE_SIZE = 30000
@@ -26,7 +30,7 @@ DEFAULT = '''
     </form>
 </body>
 </html>
-'''.FORMAT(MAX_FILE_SIZE=MAX_FILE_SIZE)
+'''.format(MAX_FILE_SIZE=MAX_FILE_SIZE)
 
 ERROR = '''
 <html>
