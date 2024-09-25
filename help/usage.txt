@@ -1,0 +1,9 @@
+https://github.com/sirfz/tesserocr
+https://github.com/prabhakar267/image2text
+https://stackoverflow.com/questions/36107233/python-tesseract-installation-on-ubuntu
+https://pypi.org/project/pytesseract/
+https://stackoverflow.com/questions/54761638/what-is-the-difference-between-pytesseract-and-tesserocr
+https://github.com/sirfz/tesserocr/issues/198
+https://stackoverflow.com/questions/65088322/opencv-tesserocr-watermark-detection
+https://groups.google.com/g/tesseract-ocr/c/Ybvl2OncGHo/m/zSRsvKIsBAAJ
+https://stackoverflow.com/questions/30404756/how-to-pass-opencv-image-to-tesseract-in-python
