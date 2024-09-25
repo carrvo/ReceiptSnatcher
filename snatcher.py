@@ -1,4 +1,4 @@
-#!/bin/python3
+#!/usr/bin/python3
 """
 https://stackoverflow.com/a/58339704
 """
@@ -17,9 +17,6 @@ import pytesseract
 
 DEBUG = False
 
-def pdf_to_img(pdf_file):
-    return pdf2image.convert_from_path(pdf_file)
-
 
 def ocr_core(file):
     options = "--psm 4"
@@ -29,7 +26,7 @@ def ocr_core(file):
 
 def file_to_pages(filepath):
     if filepath.endswith('pdf'):
-        images = pdf_to_img(filepath)
+        images = pdf2image.convert_from_path(filepath)
         return tuple(
             line # kudos to https://stackoverflow.com/a/952952
             for img in images
@@ -38,7 +35,19 @@ def file_to_pages(filepath):
     else:
         # assumes that the images is pre-processed (straightened, et cetera)
         return ocr_core(cv2.imread(filepath))
-        
+
+def bytes_to_pages(filename, content):
+    if filename.endswith('pdf'):
+        images = pdf2image.convert_from_bytes(content)
+        return tuple(
+            line # kudos to https://stackoverflow.com/a/952952
+            for img in images
+            for line in ocr_core(img)
+        )
+    else:
+        # assumes that the images is pre-processed (straightened, et cetera)
+        return ocr_core(cv2.imdecode(content))
+
 
 class NotFound:
     def __init__(self):
