@@ -105,21 +105,29 @@ class Costco(NotFound):
        self.date_row = re.compile('AUTH.+(?P<date>\d\d\d\d/\d\d/\d\d)\s+(?P<time>\d\d:\d\d:\d\d)')
        self.date_format = '%Y/%m/%d'
 
+def parse_line(parser, line):
+   if parser.state == 'finished':
+       return
+   try:
+       return parser.parse(line)
+   except StopIteration:
+       return
+
 def parse(pages, debug):
    pages = tuple(pages)
    header = pages[0]
    for parser in tuple(klass(debug=debug) for klass in (Safeway, Costco, NotFound)):
        if re.search(parser.name, header):
            break
-   for line in pages:
-       try:
-           parsed = parser.parse(line)
-           if parsed:
-               yield parsed
-       except StopIteration:
-           yield parser.date
-           break
-           #return
+   parsed = tuple(
+       row
+       for row in (
+           parse_line(parser, line)
+           for line in pages
+       )
+       if row
+   )
+   return (parsed, parser.date)
 
 if __name__ == '__main__':
    parser = argparse.ArgumentParser()
@@ -128,7 +136,8 @@ if __name__ == '__main__':
    parser.add_argument("--raw", help="print the raw text instead of parsing", action="store_true")
    args = parser.parse_args()
    pages = file_to_pages(args.filepath)
-   rows = pages if args.raw else parse(pages, debug=args.verbose)
+   rows, date = (pages, None) if args.raw else parse(pages, debug=args.verbose)
    for row in rows:
        print(row)
+   print(date)
 
