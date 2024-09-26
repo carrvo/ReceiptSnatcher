@@ -18,6 +18,7 @@ sys.path.insert(0, os.path.dirname(__file__))
 
 import snatcher
 import db
+from counter import group_count
 
 # kudos to https://flask.palletsprojects.com/en/2.0.x/deploying/cgi/
 # kudos to https://stackoverflow.com/a/64583458
@@ -63,8 +64,13 @@ OCR_body = '''<!DOCTYPE html>
 <body>
     <a id="app" hidden href="{url}"></a>
     <table>
-        <tr><th>business</th><th>date</th><th>item</th><th>price</th></tr>
-        {ocr_entries}
+        <tr>
+            <th>business</th>
+            <th>date</th>
+            <th>item</th>
+            <th>price</th>
+        </tr>
+{ocr_entries}
     </table>
     <button type="submit" onclick="submitEntries(this)">submit</button>
     <br>
@@ -74,7 +80,12 @@ OCR_body = '''<!DOCTYPE html>
 '''
 
 OCR_entry = '''
-<tr class="entry"><td>{business_name}</td><td>{transaction_date}</td><td><input type="text" value="{item}" /></td><td><input type="number" value="{price}" /></td></tr>
+        <tr class="entry">
+            <td>{business_name}</td>
+            <td>{transaction_date}</td>
+            <td><input type="text" value="{item}" /></td>
+            <td><input type="number" value="{price}" /></td>
+        </tr>
 '''
 
 class ExitWithData(Exception):
@@ -87,6 +98,10 @@ class ExitWithData(Exception):
 class ExitWithPage(ExitWithData):
     def __init__(self, page):
         super().__init__('text/html', page)
+
+class ExitWithJson(ExitWithData):
+    def __init__(self, obj):
+        super().__init__('application/json', json.dumps(obj))
 
 @app.route('/', methods=['GET', 'POST', 'PUT'])
 #@auth.required
@@ -124,19 +139,22 @@ def homepage():
             else:
                 raise ExitWithPage(ERROR.format('No form submitted!', url=URL_PATH))
         elif request.method == 'PUT':
-            #raise ExitWithData('application/json', json.dumps(tuple(request.headers.keys())))
-            #raise ExitWithData('application/json', json.dumps({'username': request.authorization.username, 'password': request.authorization.password}))
+            #raise ExitWithJson(tuple(request.headers.keys()))
+            #raise ExitWithJson({'username': request.authorization.username, 'password': request.authorization.password})
             #raise ExitWithData('text/plain', 'Received Data! {}'.format(json.dumps(form)))
-            #raise ExitWithData('application/json', json.dumps(form))
+            row_quantity = group_count(form, fields=('business_name', 'transaction_date', 'correctedItem', 'correctedPrice'), count_field='quantity')
             try:
                 with db.DB() as database:
-                    row_ids = database.insert(form)
-                    raise ExitWithData('application/json', json.dumps(row_ids))
+                    row_ids = database.insert(row_quantity)
+                    raise ExitWithJson(row_ids)
             except db.ProgrammingError as sqlerror:
                 if 'Access denied' in str(sqlerror):
                     abort(403)
                 else:
-                    raise ExitWithData(ERROR.format('SQL failure')) from sqlerror
+                    raise ExitWithData('text/plain', ERROR.format('SQL failure', url=URL_PATH)) from sqlerror
+            except db.DatabaseError as sqlerror:
+                raise ExitWithJson({'error':str(sqlerror), 'data':row_quantity, 'form':form})
+                raise ExitWithData('text/plain', ERROR.format('SQL failure', url=URL_PATH)) from sqlerror
         else:
             raise ExitWithPage(ERROR.format('Unsupported method: {}'.format(request.method), url=URL_PATH))
     except ExitWithData as exiting:

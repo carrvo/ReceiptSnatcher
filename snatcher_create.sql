@@ -5,9 +5,9 @@ CREATE TABLE IF NOT EXISTS ReceiptSnatcher(
     transaction_date DATE NOT NULL,
     item VARCHAR(32) NOT NULL,
     -- price = +/-0000.00
-    price DECIMAL(4,2) NOT NULL
-    -- but you can buy two of the same item on the same date...
-    -- CONSTRAINT ReceiptSnatcher_unique UNIQUE(transaction_date, item, price)
-    -- CONSTRAINT ReceiptSnatcher_pk PRIMARY KEY(transaction_date, item, price)
+    price DECIMAL(4,2) NOT NULL,
+    quantity TINYINT UNSIGNED NOT NULL,
+    -- CONSTRAINT ReceiptSnatcher_unique UNIQUE(business_name, transaction_date, item, price)
+    CONSTRAINT ReceiptSnatcher_pk PRIMARY KEY(business_name, transaction_date, item, price)
 );
 

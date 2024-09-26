@@ -3,7 +3,7 @@ https://dev.mysql.com/doc/connector-python/en/connector-python-examples.html
 """
 
 from mysql import connector as mysql
-from mysql.connector.errors import ProgrammingError
+from mysql.connector.errors import ProgrammingError,DatabaseError
 from flask import request
 
 class DB:
@@ -35,7 +35,7 @@ class DB:
         with self.connection.cursor() as cursor:
             row_ids = []
             for row in rows:
-                cursor.execute('INSERT INTO ReceiptSnatcher(transaction_date, item, price) VALUES(%(transaction_date)s, %(correctedItem)s, %(correctedPrice)s)', row)
+                cursor.execute('INSERT INTO ReceiptSnatcher(business_name, transaction_date, item, price, quantity) VALUES(%(business_name)s, %(transaction_date)s, %(correctedItem)s, %(correctedPrice)s, %(quantity)s)', row)
                 row_ids.append(cursor.lastrowid)
             self.connection.commit()
             return row_ids
