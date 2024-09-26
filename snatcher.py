@@ -13,6 +13,7 @@ try:
 except ImportError:
    import Image
 
+import numpy as np
 import cv2
 import pytesseract
 
@@ -39,7 +40,7 @@ def file_to_pages(filepath):
        )
    else:
        # assumes that the images is pre-processed (straightened, et cetera)
-       return ocr_core(cv2.imread(filepath))
+       return ocr_core(cv2.imread(filepath, flags=cv2.IMREAD_COLOR))
 
 def bytes_to_pages(filename, content):
    if filename.endswith('pdf'):
@@ -50,8 +51,10 @@ def bytes_to_pages(filename, content):
            for line in ocr_core(img)
        )
    else:
+       # kudos https://www.geeksforgeeks.org/python-opencv-imdecode-function/
+       image = np.asarray(bytearray(content), dtype="uint8")
        # assumes that the images is pre-processed (straightened, et cetera)
-       return ocr_core(cv2.imdecode(content))
+       return ocr_core(cv2.imdecode(image, flags=cv2.IMREAD_COLOR))
 
 
 class NotFound:
@@ -136,8 +139,13 @@ if __name__ == '__main__':
    parser.add_argument("filepath")
    parser.add_argument("--verbose", help="increase output verbosity", action="store_true")
    parser.add_argument("--raw", help="print the raw text instead of parsing", action="store_true")
+   parser.add_argument("--load", help="load file first, and use its bytes instead of its path", action="store_true")
    args = parser.parse_args()
-   pages = file_to_pages(args.filepath)
+   if args.load:
+       with open(args.filepath, mode='rb') as file:
+           pages = bytes_to_pages(file.name, file.read())
+   else:
+       pages = file_to_pages(args.filepath)
    rows = pages if args.raw else parse(pages, debug=args.verbose)
    for row in rows:
        print(row)
