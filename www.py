@@ -63,7 +63,7 @@ OCR_body = '''<!DOCTYPE html>
 <body>
     <a id="app" hidden href="{url}"></a>
     <table>
-        <tr><th>date</th><th>item</th><th>price</th></tr>
+        <tr><th>business</th><th>date</th><th>item</th><th>price</th></tr>
         {ocr_entries}
     </table>
     <button type="submit" onclick="submitEntries(this)">submit</button>
@@ -74,7 +74,7 @@ OCR_body = '''<!DOCTYPE html>
 '''
 
 OCR_entry = '''
-<tr class="entry"><td>{transaction_date}</td><td><input type="text" value="{item}" /></td><td><input type="number" value="{price}" /></td></tr>
+<tr class="entry"><td>{business_name}</td><td>{transaction_date}</td><td><input type="text" value="{item}" /></td><td><input type="number" value="{price}" /></td></tr>
 '''
 
 class ExitWithData(Exception):
@@ -127,6 +127,7 @@ def homepage():
             #raise ExitWithData('application/json', json.dumps(tuple(request.headers.keys())))
             #raise ExitWithData('application/json', json.dumps({'username': request.authorization.username, 'password': request.authorization.password}))
             #raise ExitWithData('text/plain', 'Received Data! {}'.format(json.dumps(form)))
+            #raise ExitWithData('application/json', json.dumps(form))
             try:
                 with db.DB() as database:
                     row_ids = database.insert(form)

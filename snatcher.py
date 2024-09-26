@@ -128,7 +128,7 @@ def parse(pages, debug=False):
        if row
    )
    for row in parsed:
-       row.update({'transaction_date': parser.date})
+       row.update({'transaction_date': parser.date, 'business_name': parser.name})
    return parsed
 
 if __name__ == '__main__':
