@@ -3,6 +3,7 @@ https://dev.mysql.com/doc/connector-python/en/connector-python-examples.html
 """
 
 from mysql import connector as mysql
+from flask import request
 
 class DB:
     MySQLUrl = 'my.sql.local'
@@ -11,22 +12,10 @@ class DB:
     SnatcherTable = 'ReceiptSnatcher'
     
     def __init__(self):
+        auth = request.authorization # kudos to https://stackoverflow.com/a/30060943
 
-        '''
-        if (!isset($_SERVER['PHP_AUTH_USER'])) {
-	        header('WWW-Authenticate: Basic realm="$ServerReportedDomain"');
-	        header('HTTP/1.0 401 Unauthorized');
-	        echo '401 Unauthorized';
-	        exit;
-        }
-        '''
-
-        ### TODO: replace
-        self.auth_user = ''
-        self.auth_pass = ''
-        '''
-        $_SESSION["conn"] = new mysqli($MySQLUrl, $_SERVER['PHP_AUTH_USER'], $_SERVER['PHP_AUTH_PW'], $dbname);
-        '''
+        self.auth_user = '' #auth.username
+        self.auth_pass = '' #auth.password
 
     def __enter__(self):
         self.connection = mysql.connect(host=DB.MySQLUrl,
