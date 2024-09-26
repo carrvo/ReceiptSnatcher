@@ -9,7 +9,7 @@ import sys
 import json
 
 import flask
-from flask import Flask, request, Response, url_for
+from flask import Flask, request, Response, url_for, abort
 from markupsafe import escape
 #from flask_basicauth import BasicAuth
 
@@ -127,9 +127,15 @@ def homepage():
             #raise ExitWithData('application/json', json.dumps(tuple(request.headers.keys())))
             #raise ExitWithData('application/json', json.dumps({'username': request.authorization.username, 'password': request.authorization.password}))
             #raise ExitWithData('text/plain', 'Received Data! {}'.format(json.dumps(form)))
-            with db.DB() as database:
-                row_ids = database.insert(form)
-                raise ExitWithData('application/json', json.dumps(row_ids))
+            try:
+                with db.DB() as database:
+                    row_ids = database.insert(form)
+                    raise ExitWithData('application/json', json.dumps(row_ids))
+            except db.ProgrammingError as sqlerror:
+                if 'Access denied' in str(sqlerror):
+                    abort(403)
+                else:
+                    raise ExitWithData(ERROR.format('SQL failure')) from sqlerror
         else:
             raise ExitWithPage(ERROR.format('Unsupported method: {}'.format(request.method), url=URL_PATH))
     except ExitWithData as exiting:

@@ -3,6 +3,7 @@ https://dev.mysql.com/doc/connector-python/en/connector-python-examples.html
 """
 
 from mysql import connector as mysql
+from mysql.connector.errors import ProgrammingError
 from flask import request
 
 class DB:
