@@ -12,10 +12,12 @@ class DB:
     SnatcherTable = 'ReceiptSnatcher'
     
     def __init__(self):
-        auth = request.authorization # kudos to https://stackoverflow.com/a/30060943
+        # kudos to https://stackoverflow.com/a/30060943
+        # https://stackoverflow.com/a/24128485
+        auth = request.authorization
 
-        self.auth_user = '' #auth.username
-        self.auth_pass = '' #auth.password
+        self.auth_user = auth.username
+        self.auth_pass = auth.password
 
     def __enter__(self):
         self.connection = mysql.connect(host=DB.MySQLUrl,

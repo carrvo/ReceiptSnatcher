@@ -9,10 +9,12 @@ import sys
 import json
 
 import flask
-from flask import Flask, request, Response
-from wsgiref.handlers import CGIHandler
+from flask import Flask, request, Response, url_for
 from markupsafe import escape
-from flask import url_for
+#from flask_basicauth import BasicAuth
+
+# https://modwsgi.readthedocs.io/en/master/user-guides/application-issues.html#application-working-directory
+sys.path.insert(0, os.path.dirname(__file__))
 
 import snatcher
 import db
@@ -20,8 +22,24 @@ import db
 # kudos to https://flask.palletsprojects.com/en/2.0.x/deploying/cgi/
 # kudos to https://stackoverflow.com/a/64583458
 app = Flask('snatcher')
+app.config['FLASK_AUTH_REALM'] = 'Receipt Snatcher'
 
 MAX_FILE_SIZE = 4000000
+
+DEFAULT_raw = '''<!DOCTYPE html>
+<html>
+<head>
+    <title>Receipt Snatcher</title>
+</head>
+<body>
+    <form enctype="multipart/form-data" action="{url}" method="post">
+        <input type="hidden" name="MAX_FILE_SIZE" value="{MAX_FILE_SIZE}" />
+        <p>File: <input type="file" name="filename" /></p>
+        <p><input type="submit" value="Upload" /></p>
+    </form>
+</body>
+</html>
+'''
 
 ERROR = '''<!DOCTYPE html>
 <html>
@@ -71,7 +89,10 @@ class ExitWithPage(ExitWithData):
         super().__init__('text/html', page)
 
 @app.route('/', methods=['GET', 'POST', 'PUT'])
+#@auth.required
 def homepage():
+    URL_PATH = url_for('homepage')[0:-1] # strip trailing /
+    DEFAULT = DEFAULT_raw.format(MAX_FILE_SIZE=MAX_FILE_SIZE, url=URL_PATH)
     form = request.form if request.content_type != 'application/json' else request.json
     try:
         if request.method == 'GET':
@@ -103,6 +124,8 @@ def homepage():
             else:
                 raise ExitWithPage(ERROR.format('No form submitted!', url=URL_PATH))
         elif request.method == 'PUT':
+            #raise ExitWithData('application/json', json.dumps(tuple(request.headers.keys())))
+            #raise ExitWithData('application/json', json.dumps({'username': request.authorization.username, 'password': request.authorization.password}))
             #raise ExitWithData('text/plain', 'Received Data! {}'.format(json.dumps(form)))
             with db.DB() as database:
                 row_ids = database.insert(form)
@@ -112,22 +135,5 @@ def homepage():
     except ExitWithData as exiting:
         return exiting.respond()
 
-URL_PATH = os.environ['SCRIPT_NAME'] #URL_PATH = url_for('homepage')
-
-DEFAULT = '''<!DOCTYPE html>
-<html>
-<head>
-    <title>Receipt Snatcher</title>
-</head>
-<body>
-    <form enctype="multipart/form-data" action="{url}" method="post">
-        <input type="hidden" name="MAX_FILE_SIZE" value="{MAX_FILE_SIZE}" />
-        <p>File: <input type="file" name="filename" /></p>
-        <p><input type="submit" value="Upload" /></p>
-    </form>
-</body>
-</html>
-'''.format(MAX_FILE_SIZE=MAX_FILE_SIZE, url=URL_PATH)
-
-CGIHandler().run(app)
+application = app
 
