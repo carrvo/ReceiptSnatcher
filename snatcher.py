@@ -113,7 +113,7 @@ def parse_line(parser, line):
    except StopIteration:
        return
 
-def parse(pages, debug):
+def parse(pages, debug=False):
    pages = tuple(pages)
    header = pages[0]
    for parser in tuple(klass(debug=debug) for klass in (Safeway, Costco, NotFound)):
@@ -127,7 +127,9 @@ def parse(pages, debug):
        )
        if row
    )
-   return (parsed, parser.date)
+   for row in parsed:
+       row.update({'transaction_date': parser.date})
+   return parsed
 
 if __name__ == '__main__':
    parser = argparse.ArgumentParser()
@@ -136,8 +138,7 @@ if __name__ == '__main__':
    parser.add_argument("--raw", help="print the raw text instead of parsing", action="store_true")
    args = parser.parse_args()
    pages = file_to_pages(args.filepath)
-   rows, date = (pages, None) if args.raw else parse(pages, debug=args.verbose)
+   rows = pages if args.raw else parse(pages, debug=args.verbose)
    for row in rows:
        print(row)
-   print(date)
 

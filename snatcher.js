@@ -4,10 +4,11 @@ async function submitEntries(element) {
     const entries = [];
     for (let row of rows) {
         const entry = {
-            parsedItem:row.children[0].getElementsByTagName("input")[0].defaultValue,
-            correctedItem:row.children[0].getElementsByTagName("input")[0].value,
-            parsedPrice:row.children[1].getElementsByTagName("input")[0].defaultValue,
-            correctedPrice:row.children[1].getElementsByTagName("input")[0].value,
+            transaction_date:row.children[0].innerHTML,
+            parsedItem:row.children[1].getElementsByTagName("input")[0].defaultValue,
+            correctedItem:row.children[1].getElementsByTagName("input")[0].value,
+            parsedPrice:row.children[2].getElementsByTagName("input")[0].defaultValue,
+            correctedPrice:row.children[2].getElementsByTagName("input")[0].value,
         };
         entries.push(entry);
     }

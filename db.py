@@ -43,7 +43,7 @@ class DB:
         with self.connection.cursor() as cursor:
             row_ids = []
             for row in rows:
-                cursor.execute('INSERT INTO ReceiptSnatcher(item, price) VALUES(%(correctedItem)s, %(correctedPrice)s)', row)
+                cursor.execute('INSERT INTO ReceiptSnatcher(transaction_date, item, price) VALUES(%(transaction_date)s, %(correctedItem)s, %(correctedPrice)s)', row)
                 row_ids.append(cursor.lastrowid)
             self.connection.commit()
             return row_ids

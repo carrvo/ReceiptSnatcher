@@ -62,7 +62,7 @@ OCR_body = '''<!DOCTYPE html>
 <body>
     <a id="app" hidden href="{url}"></a>
     <table>
-        <tr><th>item</th><th>price</th></tr>
+        <tr><th>date</th><th>item</th><th>price</th></tr>
         {ocr_entries}
     </table>
     <button type="submit" onclick="submitEntries(this)">submit</button>
@@ -73,7 +73,7 @@ OCR_body = '''<!DOCTYPE html>
 '''
 
 OCR_entry = '''
-<tr class="entry"><td><input type="text" value="{item}" /></td><td><input type="number" value="{price}" /></td></tr>
+<tr class="entry"><td>{transaction_date}</td><td><input type="text" value="{item}" /></td><td><input type="number" value="{price}" /></td></tr>
 '''
 
 class ExitWithData(Exception):
@@ -111,7 +111,8 @@ try:
                 rows = snatcher.parse(pages)
                 entries = '\n'.join(OCR_entry.format(**row) for row in rows)
             except Exception as error:
-                raise ExitWithPage(ERROR.format('OCR failure', url=URL_PATH)) from error
+                #raise ExitWithPage(ERROR.format('OCR failure', url=URL_PATH)) from error
+                raise ExitWithPage(ERROR.format('OCR failure:\n{}'.format(error), url=URL_PATH)) from error
             else:
                 raise ExitWithPage(OCR_body.format(ocr_entries=entries, url=URL_PATH))
         else:
