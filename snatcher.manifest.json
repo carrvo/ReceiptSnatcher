@@ -1,5 +1,15 @@
 {
+    "id": "Receipt Snatcher",
     "name": "Receipt Snatcher",
+    "short_name": "Snatcher",
     "start_url": "/snatcher",
-    "display": "minimal-ui"
+    "display": "minimal-ui",
+    "icons": [
+        {
+            "src": "/snatcher/favicon.png",
+            "type": "image/png",
+            "sizes": "144x144",
+            "purpose": "any"
+        }
+    ]
 }

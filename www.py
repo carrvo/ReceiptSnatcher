@@ -32,6 +32,7 @@ DEFAULT_raw = '''<!DOCTYPE html>
 <html>
 <head>
     <title>Receipt Snatcher</title>
+    <link rel="icon" type="image/png" href="{url}/favicon.png">
     <link rel="manifest" href="{url}/manifest.json" />
 </head>
 <body>
@@ -48,6 +49,7 @@ ERROR = '''<!DOCTYPE html>
 <html>
 <head>
     <title>Error</title>
+    <link rel="icon" type="image/png" href="{url}/favicon.png">
     <link rel="manifest" href="{url}/manifest.json" />
 </head>
 <body>
@@ -61,6 +63,7 @@ OCR_body = '''<!DOCTYPE html>
 <html>
 <head>
     <title>OCR Results</title>
+    <link rel="icon" type="image/png" href="{url}/favicon.png">
     <link rel="manifest" href="{url}/manifest.json" />
     <link rel="stylesheet" href="{url}.css"/>
     <script src="{url}.js"></script>
