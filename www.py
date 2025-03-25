@@ -108,7 +108,7 @@ class ExitWithJson(ExitWithData):
         super().__init__('application/json', json.dumps(obj))
 
 class ExitWithError(ExitWithPage):
-    def __init__(self, client_message, log_message=None, exception=None, **log_format={}):
+    def __init__(self, client_message, log_message=None, exception=None, **log_format):
         super().__init__(ERROR.format(client_message, url=URL_PATH))
         if not exception:
             exception = self
@@ -120,6 +120,7 @@ class ExitWithError(ExitWithPage):
 @app.route('/', methods=['GET', 'POST', 'PUT'])
 #@auth.required
 def homepage():
+    global URL_PATH
     URL_PATH = url_for('homepage')[0:-1] # strip trailing /
     DEFAULT = DEFAULT_raw.format(MAX_FILE_SIZE=MAX_FILE_SIZE, url=URL_PATH)
     form = request.form if request.content_type != 'application/json' else request.json
@@ -129,7 +130,7 @@ def homepage():
         elif request.method == 'POST':
             if 'filename' in request.files:
                 if not request.content_type.startswith("multipart/form-data"):
-                    raise ExitWithError('Only support Content-Type: "multipart/form-data (not {})"'.format(request.content_type)))
+                    raise ExitWithError('Only support Content-Type: "multipart/form-data (not {})"'.format(request.content_type))
                 fileitem = request.files['filename']
                 if fileitem == '' or not fileitem.filename:
                     raise ExitWithError('No file selected!')
