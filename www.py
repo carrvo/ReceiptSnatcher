@@ -6,6 +6,7 @@ import cgi
 import cgitb
 import os
 import sys
+import traceback
 import json
 
 import flask
@@ -106,6 +107,16 @@ class ExitWithJson(ExitWithData):
     def __init__(self, obj):
         super().__init__('application/json', json.dumps(obj))
 
+class ExitWithError(ExitWithPage):
+    def __init__(self, client_message, log_message=None, exception=None, **log_format={}):
+        super().__init__(ERROR.format(client_message, url=URL_PATH))
+        if not exception:
+            exception = self
+        app.logger.error('\n'.join(traceback.format_exception(exception)))
+        if not log_message:
+            log_message = client_message
+        app.logger.exception(log_message, **log_format)
+
 @app.route('/', methods=['GET', 'POST', 'PUT'])
 #@auth.required
 def homepage():
@@ -118,15 +129,15 @@ def homepage():
         elif request.method == 'POST':
             if 'filename' in request.files:
                 if not request.content_type.startswith("multipart/form-data"):
-                    raise ExitWithPage(ERROR.format('Only support Content-Type: "multipart/form-data (not {})"'.format(request.content_type), url=URL_PATH))
+                    raise ExitWithError('Only support Content-Type: "multipart/form-data (not {})"'.format(request.content_type)))
                 fileitem = request.files['filename']
                 if fileitem == '' or not fileitem.filename:
-                    raise ExitWithPage(ERROR.format('No file selected!', url=URL_PATH))
+                    raise ExitWithError('No file selected!')
                 content = fileitem.read(MAX_FILE_SIZE)
                 if fileitem.read(1):
-                    raise ExitWithPage(ERROR.format('File too large!', url=URL_PATH))
+                    raise ExitWithError('File too large!')
                 if len(content) == 0:
-                    raise ExitWithPage(ERROR.format('No file content!', url=URL_PATH))
+                    raise ExitWithError('No file content!')
                 # this is the base name of the file that was uploaded:
                 filename = os.path.basename(fileitem.filename)
                 #name, ext = os.path.splitext(filename)
@@ -135,12 +146,11 @@ def homepage():
                     rows = snatcher.parse(pages)
                     entries = '\n'.join(OCR_entry.format(**row) for row in rows)
                 except Exception as error:
-                    #raise ExitWithPage(ERROR.format('OCR failure', url=URL_PATH)) from error
-                    raise ExitWithPage(ERROR.format('OCR failure:\n{}'.format(error), url=URL_PATH)) from error
+                    raise ExitWithError('OCR failure:\n{}'.format(error)) from error
                 else:
                     raise ExitWithPage(OCR_body.format(ocr_entries=entries, url=URL_PATH))
             else:
-                raise ExitWithPage(ERROR.format('No form submitted!', url=URL_PATH))
+                raise ExitWithError('No form submitted!')
         elif request.method == 'PUT':
             #raise ExitWithJson(tuple(request.headers.keys()))
             #raise ExitWithJson({'username': request.authorization.username, 'password': request.authorization.password})
@@ -156,10 +166,10 @@ def homepage():
                 else:
                     raise ExitWithData('text/plain', ERROR.format('SQL failure', url=URL_PATH)) from sqlerror
             except db.DatabaseError as sqlerror:
-                raise ExitWithJson({'error':str(sqlerror), 'data':row_quantity, 'form':form})
-                raise ExitWithData('text/plain', ERROR.format('SQL failure', url=URL_PATH)) from sqlerror
+                #raise ExitWithJson({'error':str(sqlerror), 'data':row_quantity, 'form':form})
+                raise ExitWithError('SQL failure', log_message=json.dumps({'error':str(sqlerror), 'data':row_quantity, 'form':form})) from sqlerror
         else:
-            raise ExitWithPage(ERROR.format('Unsupported method: {}'.format(request.method), url=URL_PATH))
+            raise ExitWithError('Unsupported method: {}'.format(request.method))
     except ExitWithData as exiting:
         return exiting.respond()
 
