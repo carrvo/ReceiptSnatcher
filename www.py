@@ -85,7 +85,7 @@ OCR_body = '''<!DOCTYPE html>
 '''
 
 OCR_entry = '''
-        <tr class="entry">
+        <tr class="entry" {onclick} >
             <td><button class="delete" onclick="deleteEntry(this)">Delete</button></td>
             <td>{business_name}</td>
             <td>{transaction_date}</td>
@@ -147,7 +147,10 @@ def homepage():
                 try:
                     pages = snatcher.bytes_to_pages(filename, content)
                     rows = snatcher.parse(pages)
-                    entries = '\n'.join(OCR_entry.format(**row) for row in rows)
+                    blank_row = rows[0].copy()
+                    blank_row.update({'item':'', 'price':0})
+                    OCR_blank = OCR_entry.format(onclick='onclick="AddEntry()"', **blank_row)
+                    entries = '\n'.join((*(OCR_entry.format(onclick='', **row) for row in rows), OCR_blank))
                 except Exception as error:
                     raise ExitWithError('OCR failure:\n{}'.format(error)) from error
                 else:

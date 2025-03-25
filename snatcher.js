@@ -64,4 +64,12 @@ function deleteEntry(element) {
     let row = element.parentElement.parentElement;
     row.remove();
 }
+function addEntry() {
+    let rowParent = document.getElementsByTagName("tbody")[0];
+    let rows = rowParent.children;
+    let end = rows[rows.length - 1];
+    let copy = end.CloneNode(true);
+    rowParent.appendChild(copy);
+    end.onclick = () => {};
+}
 
