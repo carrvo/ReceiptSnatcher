@@ -66,10 +66,9 @@ function deleteEntry(element) {
 }
 function addEntry() {
     let rowParent = document.getElementsByTagName("tbody")[0];
-    let rows = rowParent.children;
-    let end = rows[rows.length - 1];
-    let copy = end.CloneNode(true);
+    let copy = document.createElement("tr");
+    copy.classList.add('entry');
+    copy.innerHTML = blank_row;
     rowParent.appendChild(copy);
-    end.onclick = () => {};
 }
 

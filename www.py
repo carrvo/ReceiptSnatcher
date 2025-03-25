@@ -64,6 +64,9 @@ OCR_body = '''<!DOCTYPE html>
     <link rel="manifest" href="{url}/manifest.json" />
     <link rel="stylesheet" href="{url}.css"/>
     <script src="{url}.js"></script>
+    <script>
+        const blank_row = `{blank_row}`;
+    </script>
 </head>
 <body>
     <a id="app" hidden href="{url}"></a>
@@ -78,6 +81,8 @@ OCR_body = '''<!DOCTYPE html>
 {ocr_entries}
     </table>
     <button type="submit" onclick="submitEntries(this)">submit</button>
+    <span />
+    <button type="button" onclick="addEntry()">Add</button>
     <br>
     <p><a href="{url}">Another</a></p>
 </body>
@@ -85,13 +90,21 @@ OCR_body = '''<!DOCTYPE html>
 '''
 
 OCR_entry = '''
-        <tr class="entry" {onclick} >
+        <tr class="entry" >
             <td><button class="delete" onclick="deleteEntry(this)">Delete</button></td>
             <td>{business_name}</td>
             <td>{transaction_date}</td>
             <td><input type="text" value="{item}" /></td>
             <td><input type="number" value="{price}" /></td>
         </tr>
+'''
+
+OCR_blank = '''
+            <td><button class="delete" onclick="deleteEntry(this)">Delete</button></td>
+            <td>{business_name}</td>
+            <td>{transaction_date}</td>
+            <td><input type="text" value="" /></td>
+            <td><input type="number" value="0" /></td>
 '''
 
 class ExitWithData(Exception):
@@ -147,14 +160,12 @@ def homepage():
                 try:
                     pages = snatcher.bytes_to_pages(filename, content)
                     rows = snatcher.parse(pages)
-                    blank_row = rows[0].copy()
-                    blank_row.update({'item':'', 'price':0})
-                    OCR_blank = OCR_entry.format(onclick='onclick="AddEntry()"', **blank_row)
-                    entries = '\n'.join((*(OCR_entry.format(onclick='', **row) for row in rows), OCR_blank))
+                    blank_row = OCR_blank.format(**rows[0])
+                    entries = '\n'.join(OCR_entry.format(**row) for row in rows)
                 except Exception as error:
                     raise ExitWithError('OCR failure:\n{}'.format(error)) from error
                 else:
-                    raise ExitWithPage(OCR_body.format(ocr_entries=entries, url=URL_PATH))
+                    raise ExitWithPage(OCR_body.format(ocr_entries=entries, blank_row=blank_row, url=URL_PATH))
             else:
                 raise ExitWithError('No form submitted!')
         elif request.method == 'PUT':
