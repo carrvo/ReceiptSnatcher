@@ -7,3 +7,8 @@ GRANT
     ON TABLE Financial.ReceiptSnatcher
     TO '{username}'@'localhost';
 
+GRANT
+    INSERT
+    ON TABLE Financial.ReceiptSnatcher_ML
+    TO '{username}'@'localhost';
+

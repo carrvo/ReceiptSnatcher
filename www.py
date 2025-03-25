@@ -122,15 +122,21 @@ class ExitWithJson(ExitWithData):
     def __init__(self, obj):
         super().__init__('application/json', json.dumps(obj))
 
+def log_exception(ex):
+    app.logger.error('\n'.join(traceback.format_exception(ex)))
+
 class ExitWithError(ExitWithPage):
     def __init__(self, client_message, log_message=None, exception=None, **log_format):
-        super().__init__(ERROR.format(client_message, url=URL_PATH))
-        if not exception:
-            exception = self
-        app.logger.error('\n'.join(traceback.format_exception(exception)))
-        if not log_message:
-            log_message = client_message
-        app.logger.exception(log_message, **log_format)
+        try:
+            super().__init__(ERROR.format(client_message, url=URL_PATH))
+            if not exception:
+                exception = self
+            log_exception(ex)
+            if not log_message:
+                log_message = client_message
+            app.logger.exception(log_message, **log_format)
+        except Exception as ex:
+            log_exception(ex)
 
 @app.route('/', methods=['GET', 'POST', 'PUT'])
 #@auth.required
@@ -175,6 +181,7 @@ def homepage():
             row_quantity = group_count(form, fields=('business_name', 'transaction_date', 'correctedItem', 'correctedPrice'), count_field='quantity')
             try:
                 with db.DB() as database:
+                    _ = database.insert_ml(form)
                     row_ids = database.insert(row_quantity)
                     raise ExitWithJson(row_ids)
             except db.ProgrammingError as sqlerror:
@@ -189,6 +196,9 @@ def homepage():
             raise ExitWithError('Unsupported method: {}'.format(request.method))
     except ExitWithData as exiting:
         return exiting.respond()
+    except Exception as ex:
+        log_exception(ex)
+        return Response('Server Failure', status=500)
 
 application = app
 

@@ -30,6 +30,14 @@ class DB:
 
     def __exit__(self, exc_type, exc, exc_tb):
         self.connection.close()
+    
+    def insert_ml(self, rows):
+        with self.connection.cursor() as cursor:
+            row_ids = []
+            for row in rows:
+                cursor.execute('INSERT INTO ReceiptSnatcher_ML(business_name, parsedItem, correctedItem, parsedPrice, correctedPrice) VALUES(%(business_name)s, %(parsedItem)s, %(correctedItem)s, %(parsedPrice)s, %(correctedPrice)s)', row)
+                row_ids.append(cursor.lastrowid)
+            return row_ids
 
     def insert(self, rows):
         with self.connection.cursor() as cursor:

@@ -10,4 +10,11 @@ CREATE TABLE IF NOT EXISTS ReceiptSnatcher(
     -- CONSTRAINT ReceiptSnatcher_unique UNIQUE(business_name, transaction_date, item, price)
     CONSTRAINT ReceiptSnatcher_pk PRIMARY KEY(business_name, transaction_date, item, price)
 );
+CREATE TABLE IF NOT EXISTS ReceiptSnatcher_ML(
+    business_name VARCHAR(32) NOT NULL,
+    parsedItem VARCHAR(32) NOT NULL,
+    correctedItem VARCHAR(32) NOT NULL,
+    parsedPrice DECIMAL(4,2) NOT NULL,
+    correctedPrice DECIMAL(4,2) NOT NULL
+);
 
