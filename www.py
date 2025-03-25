@@ -31,6 +31,7 @@ DEFAULT_raw = '''<!DOCTYPE html>
 <html>
 <head>
     <title>Receipt Snatcher</title>
+    <link rel="manifest" href="{url}/manifest.json" />
 </head>
 <body>
     <form enctype="multipart/form-data" action="{url}" method="post">
@@ -46,6 +47,7 @@ ERROR = '''<!DOCTYPE html>
 <html>
 <head>
     <title>Error</title>
+    <link rel="manifest" href="{url}/manifest.json" />
 </head>
 <body>
     <p>{}</p>
@@ -58,6 +60,7 @@ OCR_body = '''<!DOCTYPE html>
 <html>
 <head>
     <title>OCR Results</title>
+    <link rel="manifest" href="{url}/manifest.json" />
     <link rel="stylesheet" href="{url}.css"/>
     <script src="{url}.js"></script>
 </head>
