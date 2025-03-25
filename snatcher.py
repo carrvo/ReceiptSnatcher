@@ -92,7 +92,7 @@ class Safeway(NotFound):
    def __init__(self, *args, **kwargs):
        super().__init__(*args, **kwargs)
        self.name = 'SAFEWAY'
-       self.item_row = re.compile('\+?(?P<item>\w[\w\d\s]+)\s+(?P<price>-?\$\d+(\.\d+)?)')
+       self.item_row = re.compile('\+?(?P<item>\w[\w\d\s/%]+)\s+(?P<price>-?\$\d+(\.\d+)?)')
        self.stop_row = re.compile('SUBTOTAL')
        self.date_row = re.compile('(?P<date>\d\d/\d\d/\d\d)\s*')
        self.date_format = '%m/%d/%y'

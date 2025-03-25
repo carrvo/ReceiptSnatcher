@@ -134,7 +134,7 @@ class ExitWithError(ExitWithPage):
             super().__init__(ERROR.format(client_message, url=URL_PATH))
             if not exception:
                 exception = self
-            log_exception(ex)
+            log_exception(exception)
             if not log_message:
                 log_message = client_message
             app.logger.exception(log_message, **log_format)
@@ -169,6 +169,8 @@ def homepage():
                 try:
                     pages = snatcher.bytes_to_pages(filename, content)
                     rows = snatcher.parse(pages)
+                    if len(rows) < 1:
+                        raise ValueError(rows)
                     blank_row = OCR_blank.format(**rows[0])
                     entries = '\n'.join(OCR_entry.format(**row) for row in rows)
                 except Exception as error:
