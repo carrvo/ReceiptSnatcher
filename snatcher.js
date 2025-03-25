@@ -60,4 +60,8 @@ async function submitEntries(element) {
     element.disabled = false;
     */
 }
+function deleteEntry(element) {
+    let row = element.parentElement.parentElement;
+    row.remove();
+}
 

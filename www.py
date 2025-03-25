@@ -69,6 +69,7 @@ OCR_body = '''<!DOCTYPE html>
     <a id="app" hidden href="{url}"></a>
     <table>
         <tr>
+            <th></th>
             <th>business</th>
             <th>date</th>
             <th>item</th>
@@ -85,6 +86,7 @@ OCR_body = '''<!DOCTYPE html>
 
 OCR_entry = '''
         <tr class="entry">
+            <td><button class="delete" onclick="deleteEntry(this)">Delete</button></td>
             <td>{business_name}</td>
             <td>{transaction_date}</td>
             <td><input type="text" value="{item}" /></td>
